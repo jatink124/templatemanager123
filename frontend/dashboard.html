@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeMarket Seller Dashboard – Upload & Track Templates</title>
+    <meta name="description" content="Seller workspace to upload templates, manage categories, follow sales and update store settings.">
+    
+    <!-- Required CDNs -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- CRITICAL: JSZip is required globally for the upload.html fragment to process ZIP files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        sidebar: '#110c28',
+                        brand: { 50:'#F5F3FF',100:'#EDE9FE',300:'#C4B5FD',500:'#8B5CF6',600:'#7C3AED',700:'#6D28D9' },
+                        bgLight: '#F9FAFB'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-bgLight text-gray-800 font-sans flex h-screen overflow-hidden text-sm">
+
+    <!-- ===================== Sidebar ===================== -->
+    <aside class="w-[260px] bg-sidebar text-gray-300 flex flex-col justify-between h-full flex-shrink-0">
+        <div>
+            <div class="h-20 flex items-center px-6">
+                <div class="flex items-center gap-2 text-xl font-bold text-white tracking-tight">
+                    <div class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white text-[15px]">
+                        <i class="ph-bold ph-code"></i>
+                    </div>
+                    CodeMarket
+                </div>
+            </div>
+
+            <nav class="p-4 space-y-1">
+                <a href="#" onclick="loadPage('dashboard', event)" id="nav-dashboard" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl transition-colors font-medium"><i class="ph ph-house text-lg"></i> Dashboard</a>
+                <a href="#" onclick="window.editTemplateId=null;loadPage('upload', event)" id="nav-upload" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl transition-colors font-medium"><i class="ph ph-cloud-arrow-up text-lg"></i> Upload Template</a>
+                <a href="#" onclick="loadPage('templates', event)" id="nav-templates" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl transition-colors font-medium"><i class="ph ph-stack text-lg"></i> My Templates</a>
+                <a href="#" onclick="loadPage('categories', event)" id="nav-categories" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl transition-colors font-medium"><i class="ph ph-squares-four text-lg"></i> Categories</a>
+                <a href="#" onclick="loadPage('sales', event)" id="nav-sales" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl transition-colors font-medium"><i class="ph ph-chart-line-up text-lg"></i> Sales</a>
+                <a href="#" onclick="loadPage('settings', event)" id="nav-settings" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl transition-colors font-medium"><i class="ph ph-gear text-lg"></i> Settings</a>
+            </nav>
+        </div>
+
+        <div class="p-4">
+            <button onclick="if(confirm('Reset all demo data stored in this browser?')){Store.reset();loadPage('dashboard');}" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 hover:text-white transition-colors font-medium mb-4 text-left">
+                <i class="ph ph-arrow-counter-clockwise text-lg"></i> Reset demo data
+            </button>
+
+            <div class="bg-[#1e173e] p-5 rounded-2xl border border-white/5">
+                <div class="text-yellow-400 text-2xl mb-2"><i class="ph-fill ph-crown"></i></div>
+                <h4 class="text-white font-bold mb-1">Grow Faster</h4>
+                <p class="text-xs text-gray-400 mb-4 leading-relaxed">Upload more templates and reach more customers.</p>
+                <a href="index.html" class="w-full bg-white/10 hover:bg-white/20 text-white rounded-lg py-2.5 text-xs font-semibold transition-colors flex items-center justify-center gap-2">
+                    View Store <i class="ph-bold ph-arrow-square-out"></i>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ===================== Workspace ===================== -->
+    <div class="flex-1 flex flex-col h-full overflow-hidden relative">
+
+        <header class="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 flex-shrink-0 z-10">
+            <div class="relative w-full max-w-[480px]">
+                <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></i>
+                <input id="globalSearch" type="text" placeholder="Search your templates..." class="w-full bg-gray-50 border-none rounded-xl pl-10 pr-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+            </div>
+
+            <div class="flex items-center gap-6">
+                <a href="index.html" class="text-sm font-semibold text-brand-600 hover:underline hidden md:block">Open storefront</a>
+                <div class="flex items-center gap-3">
+                    <div id="userInitials" class="w-10 h-10 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold text-sm">JK</div>
+                    <div class="hidden md:block">
+                        <div id="userName" class="text-sm font-bold text-gray-900 leading-tight">Jatin K</div>
+                        <div class="text-[12px] text-gray-500">Seller</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main id="app-content" class="flex-1 overflow-y-auto px-8 py-8"></main>
+    </div>
+
+    <!-- Load LocalStorage state manager -->
+    <script src="config.js"></script>
+    <script src="store.js"></script>
+    <script>
+        const appContent = document.getElementById("app-content");
+        let currentPage = "dashboard";
+
+        function setActiveNav(page) {
+            document.querySelectorAll(".nav-item").forEach(el => {
+                el.classList.remove("bg-brand-600", "text-white");
+                el.classList.add("hover:bg-white/5", "hover:text-white");
+            });
+            const active = document.getElementById("nav-" + page);
+            if (active) {
+                active.classList.remove("hover:bg-white/5", "hover:text-white");
+                active.classList.add("bg-brand-600", "text-white");
+            }
+        }
+
+        function statCard(icon, tone, label, value, note) {
+            return `<div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-start gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-${tone}-50 flex items-center justify-center text-${tone}-500 shrink-0">
+                    <i class="ph-bold ${icon} text-3xl"></i>
+                </div>
+                <div>
+                    <div class="text-gray-500 text-xs font-semibold mb-1">${label}</div>
+                    <div class="text-2xl font-bold text-gray-900 mb-1">${value}</div>
+                    <div class="text-xs font-medium text-gray-400">${note}</div>
+                </div>
+            </div>`;
+        }
+
+        function dashboardView() {
+            const s = Store.stats();
+            const settings = Store.settings();
+            const recent = Store.templates().slice(0, 5);
+            const sales = Store.sales().slice(0, 5);
+
+            return `
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                <div>
+                    <h1 class="text-[1.75rem] font-bold text-gray-900 mb-1">Welcome back, ${Store.escape(settings.fullName.split(" ")[0])}!</h1>
+                    <p class="text-gray-500 text-sm">Everything you publish here shows up on the storefront right away.</p>
+                </div>
+                <div class="text-sm text-gray-500 font-medium">${new Date().toDateString()}</div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                ${statCard("ph-stack", "brand", "Total Templates", s.templates, s.published + " published")}
+                ${statCard("ph-shopping-cart", "green", "Total Sales", s.salesCount, "from the storefront")}
+                ${statCard("ph-eye", "orange", "Total Views", s.views.toLocaleString(), "across all templates")}
+                ${statCard("ph-wallet", "blue", "Total Earnings", Store.money(s.revenue), "lifetime")}
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div class="lg:col-span-2 bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+                    <div class="flex justify-between items-center p-6 border-b border-gray-50">
+                        <h3 class="font-bold text-gray-900 text-lg">Recent Templates</h3>
+                        <a href="#" onclick="loadPage('templates', event)" class="text-brand-600 text-sm font-medium hover:underline flex items-center gap-1">View all <i class="ph-bold ph-arrow-right"></i></a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm whitespace-nowrap">
+                            <thead class="border-b border-gray-100 bg-white text-gray-800">
+                                <tr>
+                                    <th class="py-4 px-6 font-semibold">Template</th>
+                                    <th class="py-4 px-6 font-semibold">Category</th>
+                                    <th class="py-4 px-6 font-semibold">Price</th>
+                                    <th class="py-4 px-6 font-semibold">Status</th>
+                                    <th class="py-4 px-6 font-semibold">Date</th>
+                                    <th class="py-4 px-6 font-semibold text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                ${recent.length ? recent.map(t => `
+                                <tr class="hover:bg-gray-50/50 transition-colors">
+                                    <td class="py-4 px-6">
+                                        <div class="flex items-center gap-4">
+                                            <img src="${Store.escape(t.image)}" alt="${Store.escape(t.title)}" class="w-14 h-10 rounded-md object-cover border border-gray-200">
+                                            <span class="font-semibold text-gray-900 text-[14px]">${Store.escape(t.title)}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-6 text-gray-500">${Store.escape(t.category)}</td>
+                                    <td class="py-4 px-6 font-semibold text-gray-900">${Store.money(t.price)}</td>
+                                    <td class="py-4 px-6">${statusPill(t.status)}</td>
+                                    <td class="py-4 px-6 text-gray-500">${Store.date(t.createdAt)}</td>
+                                    <td class="py-4 px-6 text-right whitespace-nowrap">
+                                        <button onclick="Store.openPreview('${t.id}')" title="Preview" class="text-gray-400 hover:text-indigo-600 mr-3"><i class="ph-bold ph-play-circle text-lg"></i></button>
+                                        <button onclick="editTemplate('${t.id}')" title="Edit" class="text-gray-400 hover:text-brand-600 mr-3"><i class="ph-bold ph-pencil-simple text-lg"></i></button>
+                                        <button onclick="toggleTemplateStatus('${t.id}')" title="Publish / unpublish" class="text-gray-400 hover:text-green-600 mr-3"><i class="ph-bold ${t.status === "Published" ? "ph-eye-slash" : "ph-upload-simple"} text-lg"></i></button>
+                                        <button onclick="deleteTemplate('${t.id}')" title="Delete" class="text-gray-400 hover:text-red-500"><i class="ph-bold ph-trash text-lg"></i></button>
+                                    </td>
+                                </tr>`).join("") : `<tr><td colspan="6" class="py-10 px-6 text-center text-gray-500">No templates yet. <a href="#" onclick="window.editTemplateId=null;loadPage('upload', event)" class="text-brand-600 font-semibold">Upload your first one</a>.</td></tr>`}
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
+                        <h4 class="font-bold text-gray-900 mb-4">Quick Actions</h4>
+                        <div class="space-y-3">
+                            <a href="#" onclick="window.editTemplateId=null;loadPage('upload', event)" class="flex items-center gap-3 p-3 rounded-xl bg-brand-50 text-brand-700 font-semibold text-sm"><i class="ph-bold ph-cloud-arrow-up text-lg"></i> Upload a template</a>
+                            <a href="#" onclick="loadPage('categories', event)" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 text-gray-700 font-semibold text-sm"><i class="ph-bold ph-squares-four text-lg"></i> Manage categories</a>
+                            <a href="index.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 text-gray-700 font-semibold text-sm"><i class="ph-bold ph-storefront text-lg"></i> Preview storefront</a>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-bold text-gray-900">Latest Sales</h4>
+                            <a href="#" onclick="loadPage('sales', event)" class="text-brand-600 text-xs font-semibold hover:underline">Manage</a>
+                        </div>
+                        ${sales.length ? sales.map(s2 => `
+                            <div class="flex items-center justify-between gap-2 py-2 border-b border-gray-50 last:border-0">
+                                <div class="min-w-0">
+                                    <div class="text-sm font-semibold text-gray-900 truncate">${Store.escape(s2.title)}</div>
+                                    <div class="text-[11px] text-gray-400">${Store.date(s2.date)} · ${Store.escape(s2.buyer || "Guest")}</div>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <span class="font-bold text-gray-900">${Store.money(s2.amount)}</span>
+                                    <button onclick="deleteSale('${s2.id}')" title="Delete sale" class="text-gray-300 hover:text-red-500"><i class="ph-bold ph-trash"></i></button>
+                                </div>
+                            </div>`).join("") : `<p class="text-sm text-gray-500">No sales yet. Record one on the Sales page.</p>`}
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        // ---- Shared CRUD helpers available to every page fragment ----
+        function editTemplate(id) {
+            window.editTemplateId = id;
+            loadPage("upload");
+        }
+
+        function toggleTemplateStatus(id) {
+            const t = Store.template(id);
+            if (!t) return;
+            Store.updateTemplate(id, { status: t.status === "Published" ? "Draft" : "Published" });
+            Store.toast(t.status === "Published" ? "Template moved to Drafts" : "Template Published");
+            if (currentPage === "dashboard") loadPage("dashboard");
+        }
+
+        function deleteTemplate(id) {
+            if (!confirm("Delete this template permanently?")) return;
+            Store.removeTemplate(id);
+            Store.toast("Template deleted");
+            if (currentPage === "dashboard") loadPage("dashboard");
+        }
+
+        function deleteSale(id) {
+            if (!confirm("Delete this sale record?")) return;
+            Store.removeSale(id);
+            Store.toast("Sale deleted");
+            if (currentPage === "dashboard") loadPage("dashboard");
+        }
+
+
+
+        function statusPill(status) {
+            const map = {
+                Published: ["green", "Published"],
+                Pending: ["orange", "Pending"],
+                Draft: ["gray", "Draft"],
+                Rejected: ["red", "Rejected"],
+            };
+            const [tone, label] = map[status] || map.Draft;
+            return `<span class="inline-flex items-center gap-1.5 bg-${tone}-50 text-${tone}-700 px-3 py-1 rounded-full border border-${tone}-100 text-[11px] font-bold">
+                <span class="w-1.5 h-1.5 bg-${tone}-500 rounded-full"></span> ${label}</span>`;
+        }
+
+        function runScripts(container) {
+            container.querySelectorAll("script").forEach(old => {
+                const s = document.createElement("script");
+                s.textContent = old.textContent;
+                old.replaceWith(s);
+            });
+        }
+
+        async function loadPage(pageName, event) {
+            if (event) event.preventDefault();
+            currentPage = pageName;
+            setActiveNav(pageName);
+
+            if (pageName === "dashboard") {
+                appContent.innerHTML = dashboardView();
+                return;
+            }
+
+            appContent.innerHTML = '<div class="flex items-center justify-center h-full"><i class="ph ph-spinner animate-spin text-4xl text-brand-600"></i></div>';
+            try {
+                const res = await fetch(pageName + ".html");
+                if (!res.ok) throw new Error("missing");
+                appContent.innerHTML = await res.text();
+                runScripts(appContent);
+            } catch (e) {
+                appContent.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-gray-500 py-16">
+                    <i class="ph ph-file-dashed text-4xl mb-4 text-brand-600"></i>
+                    <h2 class="text-xl font-semibold mb-2">Could not open this page</h2>
+                    <p>Make sure <strong>${pageName}.html</strong> sits next to dashboard.html and the folder is served over http.</p>
+                </div>`;
+            }
+        }
+
+        function syncUser() {
+            const s = Store.settings();
+            document.getElementById("userName").textContent = s.fullName;
+            document.getElementById("userInitials").textContent = s.fullName.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+        }
+
+        document.getElementById("globalSearch").addEventListener("keydown", e => {
+            if (e.key === "Enter" && e.target.value.trim()) {
+                loadPage("templates").then(() => {
+                    const input = document.getElementById("tplSearch");
+                    if (input) { input.value = e.target.value.trim(); input.dispatchEvent(new Event("input")); }
+                });
+            }
+        });
+
+       document.addEventListener("cm:changed", syncUser);
+        syncUser();
+        loadPage("dashboard");
+    </script>
+</body>
+</html>

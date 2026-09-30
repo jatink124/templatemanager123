@@ -1,0 +1,458 @@
+<!-- Upload Template (fragment loaded into dashboard.html) -->
+<!-- Requires JSZip CDN in parent dashboard window -->
+<div class="mb-8">
+    <h1 id="uploadTitle" class="text-[1.75rem] font-bold text-gray-900 mb-2">Upload New Template</h1>
+    <p id="uploadSubtitle" class="text-gray-500 text-sm">Add your template files and details. Published templates appear on the storefront instantly.</p>
+</div>
+
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8 mb-8">
+
+   <!-- 1. Category -->
+<div class="mb-10">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-base font-bold text-gray-900">1. Select Category</h3>
+        <button id="showNewCatInput" class="text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors flex items-center gap-1">
+            <i class="ph-bold ph-plus"></i> Add Custom
+        </button>
+    </div>
+    
+    <div id="catPicker" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-4"></div>
+    
+    <!-- Hidden input container for new categories -->
+    <div id="newCatContainer" class="hidden flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
+        <i class="ph ph-folder-star text-xl text-gray-400 pl-2"></i>
+        <input id="newCatInput" type="text" placeholder="Enter new category (e.g. Dashboards)" class="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500 shadow-sm">
+        <button id="addNewCatBtn" class="bg-gray-900 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm">Add</button>
+    </div>
+</div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <!-- 2. Files -->
+        <div>
+            <h3 class="text-base font-bold text-gray-900 mb-4">2. Upload Files &amp; Preview</h3>
+            
+            <!-- Interactive ZIP Upload zone for JSZip parsing -->
+            <label for="zipInput" class="border-2 border-dashed border-brand-300 bg-brand-50/40 rounded-2xl p-8 flex flex-col items-center justify-center text-center h-[240px] cursor-pointer hover:bg-brand-50 transition-colors">
+                <div class="text-brand-600 mb-3"><i class="ph ph-file-zip text-4xl"></i></div>
+                <h4 class="font-bold text-gray-900 mb-1">Upload App Files (ZIP)</h4>
+                <p id="zipLabel" class="text-gray-500 text-sm mb-5">Upload SaaS views to generate live app preview</p>
+                <span class="bg-brand-600 text-white px-6 py-2.5 rounded-lg font-medium text-sm shadow-sm">Choose ZIP File</span>
+            </label>
+            <input id="zipInput" type="file" accept=".zip" class="hidden">
+
+            <div class="mt-5">
+                <div class="text-sm font-medium text-gray-700 mb-1.5">Static Cover image</div>
+                <div class="flex items-center gap-4">
+                    <img id="previewImg" src="" alt="Template preview" class="w-24 h-16 rounded-lg object-cover border border-gray-200 bg-gray-50">
+                    <div class="space-y-2">
+                        <input id="imageInput" type="file" accept="image/*" class="block text-xs">
+                        <input id="imageUrl" type="text" placeholder="…or paste an image URL" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5">
+                <div class="text-sm font-medium text-gray-700 mb-1.5">Extra static screens (optional)</div>
+                <input id="galleryInput" type="file" accept="image/*" multiple class="block text-xs">
+            </div>
+
+            <div class="mt-5">
+                <div class="text-sm font-medium text-gray-700 mb-1.5">Live demo URL (fallback)</div>
+                <input id="demoInput" type="url" placeholder="https://your-demo-site.com" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 shadow-sm">
+            </div>
+
+            <button id="previewDraft" class="mt-5 w-full bg-gray-900 text-white hover:bg-gray-800 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 shadow-sm transition-colors">
+                <i class="ph-bold ph-play-circle"></i> Launch Live Preview
+            </button>
+        </div>
+
+
+        <!-- 3. Basic info -->
+        <div>
+            <h3 class="text-base font-bold text-gray-900 mb-4">3. Basic Information</h3>
+            <div class="space-y-5">
+                <input id="titleInput" type="text" placeholder="Template Title" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 shadow-sm">
+
+                <div class="relative">
+                    <textarea id="descInput" maxlength="200" placeholder="Short Description (1-2 lines)" rows="3" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 shadow-sm resize-none"></textarea>
+                    <div id="descCount" class="absolute bottom-3 right-3 text-[11px] text-gray-400 font-medium">0/200</div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- NEW: Pricing Tier (Free / Premium) -->
+                    <div>
+                        <div class="text-sm font-medium text-gray-700 mb-1.5">Pricing Tier</div>
+                        <select id="badgeInput" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm shadow-sm focus:outline-none">
+                            <option value="Free">Free</option>
+                            <option value="Premium">Premium</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Price Field -->
+                    <div>
+                        <div class="text-sm font-medium text-gray-700 mb-1.5">Price (USD)</div>
+                        <div class="flex items-center w-full bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm focus-within:border-brand-500">
+                            <span class="pl-4 pr-2 text-gray-500 border-r border-gray-200 bg-gray-50 py-2.5">$</span>
+                            <input id="priceInput" type="number" min="0" step="1" placeholder="e.g. 0 for Free" class="w-full pl-3 pr-4 py-2.5 text-sm focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tags Field -->
+                <div>
+                    <div class="text-sm font-medium text-gray-700 mb-1.5">Tags</div>
+                    <input id="tagsInput" type="text" placeholder="react, saas, analytics" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 shadow-sm">
+                </div>
+                
+                <!-- Features Selection Block -->
+                <div>
+                    <div class="text-sm font-medium text-gray-700 mb-2">Included Features</div>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" value="responsive" class="feature-cb w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                            <span class="text-[13px] text-gray-700 font-medium">Responsive</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" value="seo" class="feature-cb w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                            <span class="text-[13px] text-gray-700 font-medium">SEO Optimized</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" value="customize" class="feature-cb w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                            <span class="text-[13px] text-gray-700 font-medium">Easy to Customize</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" value="ecommerce" class="feature-cb w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                            <span class="text-[13px] text-gray-700 font-medium">E-commerce Ready</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" value="booking" class="feature-cb w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                            <span class="text-[13px] text-gray-700 font-medium">Booking System</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" value="multipage" class="feature-cb w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                            <span class="text-[13px] text-gray-700 font-medium">Multi-page</span>
+                        </label>
+                    </div>
+                </div>
+
+           
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <div>
+        <div class="text-sm font-medium text-gray-700 mb-1.5">Status</div>
+        <select id="statusInput" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm shadow-sm focus:outline-none">
+            <option value="Published">Published (visible immediately)</option>
+            <option value="Draft">Draft (hidden from storefront)</option>
+        </select>
+    </div>
+    <div>
+        <div class="text-sm font-medium text-gray-700 mb-1.5">Highlight Collection</div>
+        <select id="trendInput" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm shadow-sm focus:outline-none">
+            <option value="new">New</option>
+            <option value="popular">Popular</option>
+            <option value="trending">Trending</option>
+        </select>
+    </div>
+</div>
+
+                <div class="flex justify-end gap-3 pt-2">
+                    <button id="deleteTemplate" class="hidden px-6 py-3 rounded-xl text-sm font-semibold text-red-600 bg-red-50 border border-red-100 hover:bg-red-100">Delete</button>
+                    <button id="resetForm" class="px-6 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50">Clear</button>
+                    <button id="saveTemplate" class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-xl font-medium text-sm shadow-sm">Upload to Market</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    let selectedCategory = null;
+    let customCategories = []; 
+    let imageData = "";
+    let gallery = [];
+    let fileName = "";
+    let appData = null; 
+
+    // Render Categories Function
+    function renderCats() {
+        const storeCats = Store.activeCategories ? Store.activeCategories() : [];
+        const cats = [...storeCats, ...customCategories];
+        
+        if (!selectedCategory && cats[0]) selectedCategory = cats[0].name;
+        
+        document.getElementById("catPicker").innerHTML = cats.map(c => `
+            <button data-cat="${Store.escape(c.name)}" class="cat-btn flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${selectedCategory === c.name ? "border-brand-500 bg-brand-50 text-brand-700" : "border-gray-200 text-gray-600 hover:border-gray-300"}">
+                <i class="ph ${c.icon || 'ph-folder'} text-2xl mb-2"></i>
+                <span class="text-xs font-semibold text-center leading-tight">${Store.escape(c.name)}</span>
+            </button>`).join("");
+            
+        document.querySelectorAll(".cat-btn").forEach(b => b.addEventListener("click", (e) => {
+            e.preventDefault(); 
+            selectedCategory = b.dataset.cat;
+            renderCats();
+        }));
+    }
+
+    // Custom Category Event Listeners
+    const showNewCatInputBtn = document.getElementById("showNewCatInput");
+    if(showNewCatInputBtn) {
+        showNewCatInputBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            const container = document.getElementById("newCatContainer");
+            container.classList.toggle("hidden");
+            if (!container.classList.contains("hidden")) {
+                document.getElementById("newCatInput").focus();
+            }
+        });
+    }
+
+    const addNewCatBtn = document.getElementById("addNewCatBtn");
+    if(addNewCatBtn) {
+        addNewCatBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            const inputField = document.getElementById("newCatInput");
+            const val = inputField.value.trim();
+            
+            if (val) {
+                const storeCats = Store.activeCategories ? Store.activeCategories() : [];
+                const exists = storeCats.find(c => c.name.toLowerCase() === val.toLowerCase()) || 
+                               customCategories.find(c => c.name.toLowerCase() === val.toLowerCase());
+                
+                if (!exists) {
+                    customCategories.push({ name: val, icon: 'ph-folder-star' });
+                }
+                
+                selectedCategory = val; 
+                inputField.value = "";
+                document.getElementById("newCatContainer").classList.add("hidden");
+                
+                renderCats();
+                Store.toast(`Category "${val}" added`);
+            }
+        });
+    }
+
+    const newCatInput = document.getElementById("newCatInput");
+    if(newCatInput) {
+        newCatInput.addEventListener("keypress", (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById("addNewCatBtn").click();
+            }
+        });
+    }
+
+    // Auto-update price/badge based on selections
+    document.getElementById("badgeInput").addEventListener("change", (e) => {
+        if(e.target.value === "Free") document.getElementById("priceInput").value = 0;
+    });
+
+    // Form Data Collection (Now captures badge, features and price)
+ function draft() {
+        const selectedFeatures = Array.from(document.querySelectorAll('.feature-cb:checked')).map(cb => cb.value);
+        const trend = document.getElementById("trendInput").value;
+        
+        // Populate download & rating benchmarks so sorting works dynamically
+        const downloads = trend === 'trending' ? 1200 : (trend === 'popular' ? 850 : 120);
+        const rating = trend === 'popular' ? 4.9 : (trend === 'trending' ? 4.8 : 5.0);
+
+        return {
+            title: document.getElementById("titleInput").value.trim() || "Untitled SaaS Template",
+            description: document.getElementById("descInput").value.trim(),
+            category: selectedCategory || "Others",
+            badge: document.getElementById("badgeInput").value,
+            trend: trend,
+            price: Number(document.getElementById("priceInput").value) || 0,
+            tags: document.getElementById("tagsInput").value.split(",").map(t => t.trim()).filter(Boolean).slice(0, 5),
+            features: selectedFeatures,
+            image: imageData || Store.PLACEHOLDER,
+            gallery,
+            demoUrl: document.getElementById("demoInput").value.trim(),
+            appData, 
+            downloads,
+            rating,
+            views: 0,
+        };
+    }
+
+    // General Upload Event Listeners
+    document.getElementById("descInput").addEventListener("input", e => {
+        document.getElementById("descCount").textContent = e.target.value.length + "/200";
+    });
+
+    document.getElementById("zipInput").addEventListener("change", async e => {
+        const f = e.target.files[0];
+        if (!f) return;
+        fileName = f.name;
+        
+        const label = document.getElementById("zipLabel");
+        label.innerHTML = `<span class="text-brand-600">Extracting ${Store.escape(f.name)}...</span>`;
+        
+        try {
+            if (typeof JSZip === 'undefined') {
+                throw new Error("JSZip library not loaded on dashboard.");
+            }
+            
+            const jszip = new JSZip();
+            const zip = await jszip.loadAsync(f);
+            appData = {};
+            
+            const TEXT_EXT = [".html", ".htm", ".css", ".js", ".mjs", ".json", ".svg", ".txt", ".md"];
+            const MIME = {
+                ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+                ".gif": "image/gif", ".webp": "image/webp", ".ico": "image/x-icon",
+                ".woff": "font/woff", ".woff2": "font/woff2", ".ttf": "font/ttf"
+            };
+            const filePromises = [];
+            zip.forEach((relativePath, zipEntry) => {
+                if (zipEntry.dir) return;
+                const name = relativePath.split("/").pop();
+                const dot = name.lastIndexOf(".");
+                const ext = dot >= 0 ? name.slice(dot).toLowerCase() : "";
+                if (TEXT_EXT.includes(ext)) {
+                    filePromises.push(
+                        zipEntry.async("string").then(content => { appData[name] = content; })
+                    );
+                } else if (MIME[ext]) {
+                    filePromises.push(
+                        zipEntry.async("base64").then(b64 => { appData[name] = "data:" + MIME[ext] + ";base64," + b64; })
+                    );
+                }
+            });
+
+            await Promise.all(filePromises);
+            
+            const viewsCount = Object.keys(appData).length;
+            if (viewsCount > 0) {
+                label.innerHTML = `<span class="text-green-600 font-semibold"><i class="ph-bold ph-check-circle"></i> Extracted ${viewsCount} views successfully</span>`;
+                Store.toast(`Interactive SaaS App logic loaded (${viewsCount} views)`);
+            } else {
+                label.innerHTML = `<span class="text-orange-500">No HTML views found in ZIP</span>`;
+            }
+            
+        } catch(err) {
+            console.error("ZIP processing failed:", err);
+            label.innerHTML = `<span class="text-red-500">Failed to process ZIP file</span>`;
+        }
+    });
+
+    document.getElementById("imageInput").addEventListener("change", async e => {
+        const f = e.target.files[0];
+        if (!f) return;
+        imageData = await Store.fileToDataUrl(f);
+        document.getElementById("previewImg").src = imageData;
+    });
+
+    document.getElementById("imageUrl").addEventListener("change", e => {
+        imageData = e.target.value.trim();
+        if (imageData) document.getElementById("previewImg").src = imageData;
+    });
+
+    document.getElementById("galleryInput").addEventListener("change", async e => {
+        gallery = [];
+        for (const f of Array.from(e.target.files).slice(0, 6)) {
+            gallery.push(await Store.fileToDataUrl(f));
+        }
+        if (gallery.length) Store.toast(gallery.length + " extra screen(s) added");
+    });
+
+    document.getElementById("previewDraft").addEventListener("click", () => Store.openPreview(draft()));
+
+    document.getElementById("resetForm").addEventListener("click", () => {
+        window.editTemplateId = null;
+        loadPage("upload");
+    });
+
+    document.getElementById("deleteTemplate").addEventListener("click", () => {
+        if (!editing) return;
+        if (!confirm("Delete this template permanently?")) return;
+        Store.removeTemplate(editing.id);
+        window.editTemplateId = null;
+        Store.toast("Template deleted");
+        loadPage("templates");
+    });
+
+    document.getElementById("saveTemplate").addEventListener("click", () => {
+        const title = document.getElementById("titleInput").value.trim();
+        if (!title) { Store.toast("Please add a template title"); return; }
+
+        const payload = {
+            ...draft(),
+            title,
+            status: document.getElementById("statusInput").value,
+            fileName: fileName || (editing ? editing.fileName : ""),
+        };
+
+        if (editing) {
+            if (!payload.appData) delete payload.appData;
+            if (!gallery.length) delete payload.gallery;
+            delete payload.views;
+            
+            // To ensure the updateTemplate in store.js doesn't overwrite our new badge,
+            // we send it explicitly in the patch payload.
+            Store.updateTemplate(editing.id, payload);
+            window.editTemplateId = null;
+            Store.toast("Template updated");
+        }  else {
+            Store.addTemplate(payload);
+            
+            const list = Store.templates();
+            const newlyAdded = list[0];
+            Store.updateTemplate(newlyAdded.id, { 
+                badge: payload.badge, 
+                features: payload.features,
+                trend: payload.trend,
+                downloads: payload.downloads,
+                rating: payload.rating
+            });
+            
+            Store.toast("Template uploaded successfully!");
+        }
+        loadPage("templates");
+    });
+
+    // Edit Mode Initialization
+    const editing = window.editTemplateId ? Store.template(window.editTemplateId) : null;
+    document.getElementById("previewImg").src = Store.PLACEHOLDER;
+
+    if (editing) {
+        selectedCategory = editing.category;
+        imageData = editing.image || "";
+        gallery = editing.gallery || [];
+        fileName = editing.fileName || "";
+        appData = editing.appData || null;
+
+        document.getElementById("uploadTitle").textContent = "Edit Template";
+        document.getElementById("uploadSubtitle").textContent = "Update the details of this template and save your changes.";
+        document.getElementById("titleInput").value = editing.title || "";
+        document.getElementById("descInput").value = editing.description || "";
+        document.getElementById("descCount").textContent = (editing.description || "").length + "/200";
+        document.getElementById("priceInput").value = editing.price || 0;
+        
+        // Restore saved badge
+        document.getElementById("badgeInput").value = editing.badge || "Free";
+        document.getElementById("trendInput").value = editing.trend || "new";
+        document.getElementById("tagsInput").value = (editing.tags || []).join(", ");
+        
+        // Restore saved checkboxes
+        const tFeatures = editing.features || [];
+        document.querySelectorAll('.feature-cb').forEach(cb => {
+            cb.checked = tFeatures.includes(cb.value);
+        });
+
+        document.getElementById("demoInput").value = editing.demoUrl || "";
+        document.getElementById("statusInput").value = editing.status === "Draft" ? "Draft" : "Published";
+        document.getElementById("previewImg").src = editing.image || Store.PLACEHOLDER;
+        document.getElementById("saveTemplate").textContent = "Save Changes";
+        document.getElementById("deleteTemplate").classList.remove("hidden");
+        if (appData) {
+            document.getElementById("zipLabel").innerHTML = `<span class="text-green-600 font-semibold">Current app has ${Object.keys(appData).length} view(s) — upload a new ZIP to replace</span>`;
+        }
+    }
+
+    // Initial Render
+    renderCats();
+
+})();
+</script>

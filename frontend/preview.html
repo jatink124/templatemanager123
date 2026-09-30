@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { brand: '#2563EB' } } } }
+    </script>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #f6f6fb; }
+    </style>
+</head>
+<body class="flex flex-col font-sans">
+    
+    <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shrink-0 shadow-sm z-10">
+        <a href="index.html" class="flex items-center gap-2 text-[14px] font-semibold text-gray-500 hover:text-gray-900 transition-colors">
+            <i class="ph-bold ph-arrow-left text-lg"></i> Back to Marketplace
+        </a>
+        <div id="preview-title" class="text-[15px] font-bold text-gray-900 hidden md:block">Loading Preview...</div>
+        <div class="flex items-center gap-3">
+            <button class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors" onclick="window.downloadTemplate(new URLSearchParams(window.location.search).get('id'))" title="Download Template">
+                <i class="ph-bold ph-download-simple text-lg"></i>
+            </button>
+            <button id="cart-btn" class="bg-brand hover:bg-brand/90 text-white font-semibold px-4 py-2 rounded-lg text-[13px] transition-colors shadow-sm flex items-center gap-1.5">
+                Add to Cart <i class="ph-bold ph-shopping-cart text-[15px]"></i>
+            </button>
+        </div>
+    </header>
+
+    <iframe id="fullscreen-frame" class="w-full flex-grow border-none bg-white" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox"></iframe>
+
+    <script src="config.js"></script>
+    <script src="store.js"></script>
+    <script>
+        document.addEventListener("cm:ready", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            
+            // 1. Try to fetch the template from your live database
+            let t = Store.template(id);
+            
+            // 2. If it's not in the database, check the mock templates
+            if (!t) {
+                const mockTemplates = [
+                    { id: 'm1', title: 'Good Coffee Brighter Days', image: 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com' },
+                    { id: 'm2', title: 'Next Level Electronics', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com' },
+                    { id: 'm3', title: 'Reliable Plumbing Services', image: 'https://images.unsplash.com/photo-1607472586893-edb57cbbea42?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com' },
+                    { id: 'm4', title: 'Healthy Smiles Happier Lives', image: 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com' },
+                    { id: 'm5', title: 'Find Your Dream Home', image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com' },
+                    { id: 'm6', title: 'Your Rights Our Priority', image: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com' },
+                    { id: 'm7', title: 'Business Consultant Pro', image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com' },
+                    { id: 'm8', title: 'Modern Education Portal', image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com' },
+                    { id: 'm9', title: 'Tropical Travel Agency', image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com' },
+                    { id: 'm10', title: 'Tech Startup SaaS', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com' },
+                    // Safeties for standard numbers
+                    { id: '1', title: 'Good Coffee Brighter Days', image: 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com' },
+                    { id: '2', title: 'Next Level Electronics', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com' },
+                    { id: '3', title: 'Reliable Plumbing Services', image: 'https://images.unsplash.com/photo-1607472586893-edb57cbbea42?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com' },
+                    { id: '4', title: 'Healthy Smiles Happier Lives', image: 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com' }
+                ];
+                t = mockTemplates.find(x => String(x.id) === String(id));
+            }
+            
+            if (t) {
+                const frame = document.getElementById('fullscreen-frame');
+                
+                // Populate Header
+                document.title = t.title + " - Live Preview";
+                document.getElementById('preview-title').textContent = t.title;
+
+                document.getElementById('cart-btn').addEventListener('click', () => {
+                    Store.toast('"' + t.title + '" added to your cart!');
+                });
+
+                // Scenario A: The template has a ZIP file uploaded
+                if (t.appData && Object.keys(t.appData).length > 0) {
+                    const htmlViews = Object.keys(t.appData).filter((k) => /\.html?$/i.test(k));
+                    const entry = t.appData["index.html"] ? "index.html" : htmlViews[0];
+                    if (entry) {
+                        window.addEventListener("message", (e) => {
+                            const target = e.data && e.data.cmNav;
+                            if (target && t.appData[target] != null) {
+                                frame.srcdoc = Store.buildAppDocument(t.appData, target);
+                            }
+                        });
+                        frame.srcdoc = Store.buildAppDocument(t.appData, entry);
+                    }
+                } 
+                // Scenario B: The template has a Live Demo URL
+                else if (t.demoUrl && t.demoUrl.trim() !== '') {
+                    frame.src = t.demoUrl;
+                } 
+                // Scenario C: No Zip and No URL. Fallback to image.
+                else {
+                    frame.style.display = 'none';
+                    const div = document.createElement('div');
+                    div.style.cssText = 'width:100%; height:100%; overflow:auto; display:flex; flex-direction:column; align-items:center; padding: 40px;';
+                    div.innerHTML = `
+                        <div style="background-color: #FEF2F2; color: #991B1B; border: 1px solid #F87171; padding: 12px 20px; border-radius: 8px; margin-bottom: 24px; text-align: center; max-width: 800px; width: 100%; font-weight: 500;">
+                            ⚠️ No ZIP file or Live Demo URL was provided for this template. Showing cover image fallback.
+                        </div>
+                        <img src="${Store.escape(t.image)}" style="max-width:1000px; width:100%; display:block; border-radius: 12px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);">
+                    `;
+                    document.body.appendChild(div);
+                }
+            } else {
+                document.getElementById('fullscreen-frame').style.display = 'none';
+                document.body.innerHTML += "<div style='display:flex; height:100%; align-items:center; justify-content:center;'><div class='text-center'><i class='ph ph-file-dashed text-4xl text-gray-400 mb-2'></i><h2 class='text-gray-900 font-bold'>Template not found.</h2></div></div>";
+            }
+        });
+        
+        window.downloadTemplate = function(id) {
+            let t = typeof Store !== 'undefined' ? Store.template(id) : null;
+            if (!t) return;
+            const a = document.createElement('a');
+            a.href = t.fileUrl || 'data:text/plain;charset=utf-8,' + encodeURIComponent('Source code payload for ' + t.title);
+            a.download = t.title.toLowerCase().replace(/\s+/g, '-') + '.zip';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        };
+    </script>
+</body>
+</html>

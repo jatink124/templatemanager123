@@ -1,0 +1,240 @@
+<!-- Sales (fragment loaded into dashboard.html) -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+    <div>
+        <h1 class="text-[1.75rem] font-bold text-gray-900 mb-1">Sales</h1>
+        <p class="text-gray-500 text-sm">Record, edit and remove sales. Totals update everywhere instantly.</p>
+    </div>
+    <button id="saleAdd" class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-lg font-medium text-sm shadow-sm flex items-center gap-2 whitespace-nowrap transition-colors">
+        <i class="ph-bold ph-plus"></i> Record Sale
+    </button>
+</div>
+
+<div id="saleStats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8"></div>
+
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-10">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between p-6 border-b border-gray-100 gap-4">
+        <h3 class="font-bold text-gray-900 text-lg">Recent Orders</h3>
+        <div class="flex items-center gap-3">
+            <div class="relative w-64">
+                <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input id="saleSearch" type="text" placeholder="Search buyer or template..." class="w-full bg-white border border-gray-200 rounded-lg pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-brand-500 shadow-sm">
+            </div>
+            <select id="saleStatus" class="bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm shadow-sm focus:outline-none cursor-pointer">
+                <option value="all">All Status</option>
+                <option value="Completed">Completed</option>
+                <option value="Pending">Pending</option>
+                <option value="Refunded">Refunded</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead class="border-b border-gray-100 bg-gray-50/50">
+                <tr>
+                    <th class="py-4 px-6 font-semibold text-gray-900">Order</th>
+                    <th class="py-4 px-6 font-semibold text-gray-900">Template</th>
+                    <th class="py-4 px-6 font-semibold text-gray-900">Buyer</th>
+                    <th class="py-4 px-6 font-semibold text-gray-900">Amount</th>
+                    <th class="py-4 px-6 font-semibold text-gray-900">Status</th>
+                    <th class="py-4 px-6 font-semibold text-gray-900">Date</th>
+                    <th class="py-4 px-6 font-semibold text-gray-900 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="saleBody" class="divide-y divide-gray-50"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add / Edit modal -->
+<div id="saleModal" class="hidden fixed inset-0 z-[9000] bg-black/50 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+            <h3 id="saleModalTitle" class="font-bold text-gray-900 text-lg">Record Sale</h3>
+            <button id="saleModalClose" class="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center">&times;</button>
+        </div>
+        <div class="p-6 space-y-4">
+            <div>
+                <label class="block text-sm font-bold text-gray-900 mb-2">Template</label>
+                <select id="saleTemplate" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none"></select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-900 mb-2">Buyer name</label>
+                    <input id="saleBuyer" type="text" placeholder="Jane Doe" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-900 mb-2">Buyer email</label>
+                    <input id="saleEmail" type="email" placeholder="jane@example.com" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-900 mb-2">Amount (USD)</label>
+                    <input id="saleAmount" type="number" min="0" step="1" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-900 mb-2">Status</label>
+                    <select id="saleStatusInput" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none">
+                        <option>Completed</option>
+                        <option>Pending</option>
+                        <option>Refunded</option>
+                    </select>
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-sm font-bold text-gray-900 mb-2">Date</label>
+                    <input id="saleDate" type="date" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500">
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-100">
+            <button id="saleCancel" class="px-4 py-2.5 rounded-lg text-sm font-medium border border-gray-200 bg-white hover:bg-gray-50">Cancel</button>
+            <button id="saleSave" class="px-5 py-2.5 rounded-lg text-sm font-semibold bg-brand-600 hover:bg-brand-700 text-white">Save Sale</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    let query = "";
+    let filter = "all";
+    let editingId = null;
+    const modal = document.getElementById("saleModal");
+
+    function statCard(icon, tone, value, label) {
+        return `<div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-${tone}-50 flex items-center justify-center text-${tone}-600 shrink-0">
+                <i class="ph-bold ${icon} text-2xl"></i>
+            </div>
+            <div>
+                <div class="text-gray-500 text-xs font-semibold mb-1">${label}</div>
+                <div class="text-2xl font-bold text-gray-900">${value}</div>
+            </div>
+        </div>`;
+    }
+
+    function renderStats() {
+        const sales = Store.sales();
+        const completed = sales.filter(s => s.status !== "Refunded");
+        const revenue = completed.reduce((t, s) => t + Number(s.amount || 0), 0);
+        const buyers = new Set(sales.map(s => (s.email || s.buyer || "").toLowerCase()).filter(Boolean)).size;
+        document.getElementById("saleStats").innerHTML =
+            statCard("ph-currency-circle-dollar", "green", sales.length, "Total Sales") +
+            statCard("ph-coin", "indigo", Store.money(revenue), "Total Revenue") +
+            statCard("ph-shopping-cart", "blue", Store.money(completed.length ? revenue / completed.length : 0), "Average Order Value") +
+            statCard("ph-users-three", "orange", buyers, "Unique Buyers");
+    }
+
+    function pill(status) {
+        const map = { Completed: "green", Pending: "orange", Refunded: "red" };
+        const tone = map[status] || "gray";
+        return `<span class="inline-flex items-center gap-1.5 bg-${tone}-50 text-${tone}-700 px-3 py-1 rounded-full border border-${tone}-100 text-[11px] font-bold">
+            <span class="w-1.5 h-1.5 bg-${tone}-500 rounded-full"></span> ${Store.escape(status)}</span>`;
+    }
+
+    function render() {
+        renderStats();
+        let list = Store.sales();
+        if (filter !== "all") list = list.filter(s => s.status === filter);
+        if (query) {
+            const q = query.toLowerCase();
+            list = list.filter(s => (s.buyer || "").toLowerCase().includes(q) || (s.title || "").toLowerCase().includes(q) || (s.email || "").toLowerCase().includes(q));
+        }
+
+        document.getElementById("saleBody").innerHTML = list.length ? list.map(s => `
+            <tr class="hover:bg-gray-50/80 transition-colors">
+                <td class="py-4 px-6 font-semibold text-gray-900">#${Store.escape(s.id.slice(-6).toUpperCase())}</td>
+                <td class="py-4 px-6 text-gray-700">${Store.escape(s.title)}</td>
+                <td class="py-4 px-6">
+                    <div class="font-medium text-gray-900">${Store.escape(s.buyer)}</div>
+                    <div class="text-[12px] text-gray-400">${Store.escape(s.email || "")}</div>
+                </td>
+                <td class="py-4 px-6 font-semibold text-gray-900">${Store.money(s.amount)}</td>
+                <td class="py-4 px-6">${pill(s.status)}</td>
+                <td class="py-4 px-6 text-gray-500">${Store.date(s.date)}</td>
+                <td class="py-4 px-6 text-right whitespace-nowrap">
+                    <button data-edit="${s.id}" title="Edit sale" class="text-gray-400 hover:text-brand-600 mr-3"><i class="ph-bold ph-pencil-simple text-lg"></i></button>
+                    <button data-refund="${s.id}" title="Mark refunded" class="text-gray-400 hover:text-orange-500 mr-3"><i class="ph-bold ph-arrow-u-up-left text-lg"></i></button>
+                    <button data-del="${s.id}" title="Delete sale" class="text-gray-400 hover:text-red-500"><i class="ph-bold ph-trash text-lg"></i></button>
+                </td>
+            </tr>`).join("") : `<tr><td colspan="7" class="py-16 text-center text-gray-500">No sales recorded yet.</td></tr>`;
+
+        document.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => openModal(b.dataset.edit)));
+        document.querySelectorAll("[data-refund]").forEach(b => b.addEventListener("click", () => {
+            Store.updateSale(b.dataset.refund, { status: "Refunded" });
+            render();
+            Store.toast("Sale marked as refunded");
+        }));
+        document.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => {
+            if (!confirm("Delete this sale record?")) return;
+            Store.removeSale(b.dataset.del);
+            render();
+            Store.toast("Sale deleted");
+        }));
+    }
+
+    function openModal(id) {
+        editingId = id || null;
+        const s = id ? Store.sale(id) : null;
+        const templates = Store.templates();
+        document.getElementById("saleModalTitle").textContent = s ? "Edit Sale" : "Record Sale";
+        document.getElementById("saleTemplate").innerHTML = templates.length
+            ? templates.map(t => `<option value="${t.id}">${Store.escape(t.title)} — ${Store.money(t.price)}</option>`).join("")
+            : `<option value="">No templates yet</option>`;
+        if (s && s.templateId) document.getElementById("saleTemplate").value = s.templateId;
+        document.getElementById("saleBuyer").value = s ? s.buyer : "";
+        document.getElementById("saleEmail").value = s ? (s.email || "") : "";
+        const picked = Store.template(document.getElementById("saleTemplate").value);
+        document.getElementById("saleAmount").value = s ? s.amount : (picked ? picked.price : 0);
+        document.getElementById("saleStatusInput").value = s ? s.status : "Completed";
+        document.getElementById("saleDate").value = new Date(s ? s.date : Date.now()).toISOString().slice(0, 10);
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+    }
+
+    function closeModal() {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        editingId = null;
+    }
+
+    document.getElementById("saleTemplate").addEventListener("change", e => {
+        const t = Store.template(e.target.value);
+        if (t && !editingId) document.getElementById("saleAmount").value = t.price;
+    });
+
+    document.getElementById("saleAdd").addEventListener("click", () => openModal(null));
+    document.getElementById("saleModalClose").addEventListener("click", closeModal);
+    document.getElementById("saleCancel").addEventListener("click", closeModal);
+    modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
+
+    document.getElementById("saleSave").addEventListener("click", () => {
+        const templateId = document.getElementById("saleTemplate").value;
+        const t = Store.template(templateId);
+        const buyer = document.getElementById("saleBuyer").value.trim();
+        if (!buyer) { Store.toast("Please add a buyer name"); return; }
+        const dateValue = document.getElementById("saleDate").value;
+        const payload = {
+            templateId,
+            title: t ? t.title : "Untitled template",
+            buyer,
+            email: document.getElementById("saleEmail").value.trim(),
+            amount: Number(document.getElementById("saleAmount").value) || 0,
+            status: document.getElementById("saleStatusInput").value,
+            date: dateValue ? new Date(dateValue).toISOString() : new Date().toISOString(),
+        };
+        if (editingId) {
+            Store.updateSale(editingId, payload);
+            Store.toast("Sale updated");
+        } else {
+            Store.addSale(payload);
+            Store.toast("Sale recorded");
+        }
+        closeModal();
+        render();
+    });
+
+    document.getElementById("saleSearch").addEventListener("input", e => { query = e.target.value.trim(); render(); });
+    document.getElementById("saleStatus").addEventListener("change", e => { filter = e.target.value; render(); });
+
+    render();
+})();
+</script>

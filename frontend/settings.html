@@ -1,0 +1,180 @@
+<!-- Settings (fragment loaded into dashboard.html) -->
+<div class="mb-8">
+    <h1 class="text-[1.75rem] font-bold text-gray-900 mb-1">Settings</h1>
+    <p class="text-gray-500 text-sm">Update your profile, store details, payouts and notifications. Everything saves to your store data.</p>
+</div>
+
+<div class="max-w-3xl space-y-6 mb-10">
+
+    <!-- Profile -->
+    <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 shadow-sm">
+        <div class="mb-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Profile Information</h2>
+            <p class="text-[13px] text-gray-500">This name shows on your dashboard and storefront.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-bold text-gray-900 mb-2">Full Name</label>
+                <input id="setFullName" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 shadow-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-900 mb-2">Email Address</label>
+                <input id="setEmail" type="email" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 shadow-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-900 mb-2">Phone Number</label>
+                <input id="setPhone" type="text" placeholder="+91 98765 43210" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 shadow-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-900 mb-2">Location</label>
+                <input id="setLocation" type="text" placeholder="India" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 shadow-sm">
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-bold text-gray-900 mb-2">Bio</label>
+                <textarea id="setBio" rows="3" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 shadow-sm resize-none"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Store -->
+    <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 shadow-sm">
+        <div class="mb-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Store Details</h2>
+            <p class="text-[13px] text-gray-500">How buyers find and recognise your store.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-bold text-gray-900 mb-2">Store Name</label>
+                <input id="setStoreName" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 shadow-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-900 mb-2">Store URL</label>
+                <input id="setStoreUrl" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 shadow-sm">
+            </div>
+        </div>
+    </div>
+
+    <!-- Payout -->
+    <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 shadow-sm">
+        <div class="mb-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Payout</h2>
+            <p class="text-[13px] text-gray-500">Where your earnings are sent.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-bold text-gray-900 mb-2">Payout Method</label>
+                <select id="setPayoutMethod" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none shadow-sm">
+                    <option>PayPal</option>
+                    <option>Bank Transfer</option>
+                    <option>UPI</option>
+                    <option>Stripe</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-900 mb-2">Payout Email / ID</label>
+                <input id="setPayoutEmail" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 shadow-sm">
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 shadow-sm">
+        <div class="mb-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Notifications</h2>
+            <p class="text-[13px] text-gray-500">Choose what you want to hear about.</p>
+        </div>
+        <div class="space-y-4">
+            <label class="flex items-center justify-between gap-4">
+                <span class="text-sm font-medium text-gray-800">New sales</span>
+                <input id="setNotifySales" type="checkbox" class="w-5 h-5 accent-brand-600">
+            </label>
+            <label class="flex items-center justify-between gap-4">
+                <span class="text-sm font-medium text-gray-800">New reviews</span>
+                <input id="setNotifyReviews" type="checkbox" class="w-5 h-5 accent-brand-600">
+            </label>
+            <label class="flex items-center justify-between gap-4">
+                <span class="text-sm font-medium text-gray-800">Product news</span>
+                <input id="setNotifyNews" type="checkbox" class="w-5 h-5 accent-brand-600">
+            </label>
+        </div>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="bg-white rounded-2xl border border-red-100 p-6 md:p-8 shadow-sm">
+        <div class="mb-4">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Danger Zone</h2>
+            <p class="text-[13px] text-gray-500">Reset your settings or wipe all store data (templates, categories and sales).</p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <button id="setReset" class="px-4 py-2.5 rounded-lg text-sm font-medium border border-gray-200 bg-white hover:bg-gray-50">Reset profile settings</button>
+            <button id="setWipe" class="px-4 py-2.5 rounded-lg text-sm font-semibold bg-red-50 text-red-600 border border-red-100 hover:bg-red-100">Delete all store data</button>
+        </div>
+    </div>
+
+    <div class="flex justify-end gap-3">
+        <button id="setCancel" class="px-4 py-2.5 rounded-lg text-sm font-medium border border-gray-200 bg-white hover:bg-gray-50">Discard changes</button>
+        <button id="setSave" class="px-6 py-2.5 rounded-lg text-sm font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-sm">Save Changes</button>
+    </div>
+</div>
+
+<script>
+(function () {
+    function fill() {
+        const s = Store.settings();
+        document.getElementById("setFullName").value = s.fullName || "";
+        document.getElementById("setEmail").value = s.email || "";
+        document.getElementById("setPhone").value = s.phone || "";
+        document.getElementById("setLocation").value = s.location || "";
+        document.getElementById("setBio").value = s.bio || "";
+        document.getElementById("setStoreName").value = s.storeName || "";
+        document.getElementById("setStoreUrl").value = s.storeUrl || "";
+        document.getElementById("setPayoutMethod").value = s.payoutMethod || "PayPal";
+        document.getElementById("setPayoutEmail").value = s.payoutEmail || "";
+        document.getElementById("setNotifySales").checked = !!s.notifySales;
+        document.getElementById("setNotifyReviews").checked = !!s.notifyReviews;
+        document.getElementById("setNotifyNews").checked = !!s.notifyNews;
+    }
+
+    document.getElementById("setSave").addEventListener("click", () => {
+        const fullName = document.getElementById("setFullName").value.trim();
+        if (!fullName) { Store.toast("Please add your full name"); return; }
+        Store.saveSettings({
+            fullName,
+            email: document.getElementById("setEmail").value.trim(),
+            phone: document.getElementById("setPhone").value.trim(),
+            location: document.getElementById("setLocation").value.trim(),
+            bio: document.getElementById("setBio").value.trim(),
+            storeName: document.getElementById("setStoreName").value.trim(),
+            storeUrl: document.getElementById("setStoreUrl").value.trim(),
+            payoutMethod: document.getElementById("setPayoutMethod").value,
+            payoutEmail: document.getElementById("setPayoutEmail").value.trim(),
+            notifySales: document.getElementById("setNotifySales").checked,
+            notifyReviews: document.getElementById("setNotifyReviews").checked,
+            notifyNews: document.getElementById("setNotifyNews").checked,
+        });
+        if (typeof syncUser === "function") syncUser();
+        Store.toast("Settings saved");
+    });
+
+    document.getElementById("setCancel").addEventListener("click", () => { fill(); Store.toast("Changes discarded"); });
+
+    document.getElementById("setReset").addEventListener("click", () => {
+        if (!confirm("Reset your profile settings to the defaults?")) return;
+        Store.resetSettings();
+        fill();
+        if (typeof syncUser === "function") syncUser();
+        Store.toast("Settings reset");
+    });
+
+    document.getElementById("setWipe").addEventListener("click", () => {
+        if (!confirm("This deletes all templates, categories and sales. Continue?")) return;
+        Store.reset();
+        fill();
+        if (typeof syncUser === "function") syncUser();
+        Store.toast("All store data deleted");
+        loadPage("dashboard");
+    });
+
+    fill();
+})();
+</script>

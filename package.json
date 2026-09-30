@@ -1,0 +1,8 @@
+{
+  "name": "codetemplatemarket",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./backend/server.js"
+  }
+}

@@ -1,0 +1,215 @@
+<!-- Categories (fragment loaded into dashboard.html) -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+    <div>
+        <h1 class="text-[1.75rem] font-bold text-gray-900 mb-2">Categories</h1>
+        <p class="text-gray-500 text-sm">Create, edit, disable or delete the categories used across your store.</p>
+    </div>
+    <button id="catAdd" class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors text-sm shadow-sm flex items-center gap-2 whitespace-nowrap">
+        <i class="ph-bold ph-plus"></i> Add Category
+    </button>
+</div>
+
+<div id="catStats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8"></div>
+
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-10">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between p-6 border-b border-gray-100 gap-4">
+        <h3 class="font-bold text-gray-900 text-lg">Category List</h3>
+        <div class="flex items-center gap-3">
+            <div class="relative w-64">
+                <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input id="catSearch" type="text" placeholder="Search categories..." class="w-full bg-white border border-gray-200 rounded-lg pl-9 pr-4 py-2 text-sm text-gray-700 focus:outline-none focus:border-brand-500 shadow-sm">
+            </div>
+            <select id="catStatus" class="bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700 focus:outline-none shadow-sm cursor-pointer">
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead class="border-b border-gray-100 bg-white">
+                <tr>
+                    <th class="py-4 px-6 font-bold text-gray-900 w-16">#</th>
+                    <th class="py-4 px-4 font-bold text-gray-900">Category Name</th>
+                    <th class="py-4 px-4 font-bold text-gray-900 text-center">Icon</th>
+                    <th class="py-4 px-4 font-bold text-gray-900 text-center">Templates</th>
+                    <th class="py-4 px-4 font-bold text-gray-900 text-center">Status</th>
+                    <th class="py-4 px-6 font-bold text-gray-900 text-right">Action</th>
+                </tr>
+            </thead>
+            <tbody id="catBody" class="divide-y divide-gray-50 bg-white"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add / Edit modal -->
+<div id="catModal" class="hidden fixed inset-0 z-[9000] bg-black/50 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+            <h3 id="catModalTitle" class="font-bold text-gray-900 text-lg">Add Category</h3>
+            <button id="catModalClose" class="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center">&times;</button>
+        </div>
+        <div class="p-6 space-y-4">
+            <div>
+                <label class="block text-sm font-bold text-gray-900 mb-2">Name</label>
+                <input id="catName" type="text" placeholder="e.g. Landing Pages" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-900 mb-2">Description</label>
+                <textarea id="catDesc" rows="2" placeholder="Short description" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 resize-none"></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-900 mb-2">Icon</label>
+                    <select id="catIcon" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none"></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-900 mb-2">Status</label>
+                    <select id="catActive" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none">
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-100">
+            <button id="catCancel" class="px-4 py-2.5 rounded-lg text-sm font-medium border border-gray-200 bg-white hover:bg-gray-50">Cancel</button>
+            <button id="catSave" class="px-5 py-2.5 rounded-lg text-sm font-semibold bg-brand-600 hover:bg-brand-700 text-white">Save Category</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const ICONS = ["ph-desktop", "ph-squares-four", "ph-shopping-cart", "ph-file-text", "ph-bounding-box", "ph-dots-three-circle", "ph-rocket-launch", "ph-palette", "ph-device-mobile"];
+    let query = "";
+    let status = "all";
+    let editingId = null;
+
+    const modal = document.getElementById("catModal");
+
+    function statCard(icon, tone, value, label) {
+        return `<div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-start gap-4">
+            <div class="w-14 h-14 rounded-xl bg-${tone}-50 flex items-center justify-center text-${tone}-500 shrink-0">
+                <i class="ph-bold ${icon} text-2xl"></i>
+            </div>
+            <div class="pt-1">
+                <div class="text-2xl font-bold text-gray-900 mb-0.5">${value}</div>
+                <div class="text-gray-500 text-xs font-semibold">${label}</div>
+            </div>
+        </div>`;
+    }
+
+    function renderStats() {
+        const cats = Store.categories();
+        document.getElementById("catStats").innerHTML =
+            statCard("ph-squares-four", "brand", cats.length, "Total Categories") +
+            statCard("ph-check-circle", "green", cats.filter(c => c.active).length, "Active Categories") +
+            statCard("ph-pause", "orange", cats.filter(c => !c.active).length, "Inactive Categories") +
+            statCard("ph-stack", "blue", Store.templates().length, "Total Templates");
+    }
+
+    function render() {
+        renderStats();
+        let list = Store.categories();
+        if (query) list = list.filter(c => c.name.toLowerCase().includes(query.toLowerCase()));
+        if (status !== "all") list = list.filter(c => (status === "active" ? c.active : !c.active));
+
+        document.getElementById("catBody").innerHTML = list.length ? list.map((c, i) => `
+            <tr class="hover:bg-gray-50/50 transition-colors">
+                <td class="py-4 px-6 text-gray-700 font-medium">${i + 1}</td>
+                <td class="py-4 px-4">
+                    <div class="font-bold text-gray-900 text-[14px]">${Store.escape(c.name)}</div>
+                    <div class="text-[12px] text-gray-500 mt-0.5">${Store.escape(c.description || "No description")}</div>
+                </td>
+                <td class="py-4 px-4 text-center">
+                    <div class="inline-flex w-10 h-10 rounded-xl bg-brand-50 text-brand-600 items-center justify-center border border-brand-100">
+                        <i class="ph-bold ${Store.escape(c.icon)} text-[20px]"></i>
+                    </div>
+                </td>
+                <td class="py-4 px-4 text-center text-gray-700">${Store.templatesInCategory(c.name)}</td>
+                <td class="py-4 px-4 text-center">
+                    <span class="inline-flex items-center gap-1.5 ${c.active ? "bg-green-50 text-green-700 border-green-100" : "bg-gray-100 text-gray-600 border-gray-200"} px-3 py-1 rounded-full border text-[11px] font-bold">
+                        <span class="w-1.5 h-1.5 ${c.active ? "bg-green-500" : "bg-gray-400"} rounded-full"></span> ${c.active ? "Active" : "Inactive"}
+                    </span>
+                </td>
+                <td class="py-4 px-6 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                        <button data-edit="${c.id}" title="Edit" class="w-8 h-8 rounded border border-gray-200 text-gray-500 hover:text-brand-600 hover:bg-gray-50 flex items-center justify-center bg-white"><i class="ph-bold ph-pencil-simple"></i></button>
+                        <button data-toggle="${c.id}" title="${c.active ? "Disable" : "Enable"}" class="w-8 h-8 rounded border border-gray-200 text-gray-500 hover:text-green-600 hover:bg-gray-50 flex items-center justify-center bg-white"><i class="ph-bold ${c.active ? "ph-eye-slash" : "ph-eye"}"></i></button>
+                        <button data-del="${c.id}" title="Delete" class="w-8 h-8 rounded border border-gray-200 text-gray-500 hover:text-red-500 hover:bg-gray-50 flex items-center justify-center bg-white"><i class="ph-bold ph-trash"></i></button>
+                    </div>
+                </td>
+            </tr>`).join("") : `<tr><td colspan="6" class="py-16 text-center text-gray-500">No categories match this filter.</td></tr>`;
+
+        document.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => openModal(b.dataset.edit)));
+        document.querySelectorAll("[data-toggle]").forEach(b => b.addEventListener("click", () => {
+            Store.toggleCategory(b.dataset.toggle);
+            render();
+            Store.toast("Category status updated");
+        }));
+        document.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => {
+            const c = Store.category(b.dataset.del);
+            const used = Store.templatesInCategory(c.name);
+            if (!confirm(`Delete "${c.name}"?` + (used ? ` ${used} template(s) will move to "Others".` : ""))) return;
+            Store.removeCategory(c.id);
+            render();
+            Store.toast("Category deleted");
+        }));
+    }
+
+    function openModal(id) {
+        editingId = id || null;
+        const c = id ? Store.category(id) : null;
+        document.getElementById("catModalTitle").textContent = c ? "Edit Category" : "Add Category";
+        document.getElementById("catName").value = c ? c.name : "";
+        document.getElementById("catDesc").value = c ? (c.description || "") : "";
+        document.getElementById("catIcon").innerHTML = ICONS.map(i => `<option value="${i}">${i.replace("ph-", "")}</option>`).join("");
+        document.getElementById("catIcon").value = c ? c.icon : ICONS[0];
+        document.getElementById("catActive").value = c ? String(!!c.active) : "true";
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+    }
+
+    function closeModal() {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        editingId = null;
+    }
+
+    document.getElementById("catAdd").addEventListener("click", () => openModal(null));
+    document.getElementById("catModalClose").addEventListener("click", closeModal);
+    document.getElementById("catCancel").addEventListener("click", closeModal);
+    modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
+
+    document.getElementById("catSave").addEventListener("click", () => {
+        const name = document.getElementById("catName").value.trim();
+        if (!name) { Store.toast("Please add a category name"); return; }
+        const dup = Store.categories().find(c => c.name.toLowerCase() === name.toLowerCase() && c.id !== editingId);
+        if (dup) { Store.toast("That category already exists"); return; }
+
+        const payload = {
+            name,
+            description: document.getElementById("catDesc").value.trim(),
+            icon: document.getElementById("catIcon").value,
+            active: document.getElementById("catActive").value === "true",
+        };
+        if (editingId) {
+            Store.updateCategory(editingId, payload);
+            Store.toast("Category updated");
+        } else {
+            Store.addCategory(payload);
+            Store.toast("Category created");
+        }
+        closeModal();
+        render();
+    });
+
+    document.getElementById("catSearch").addEventListener("input", e => { query = e.target.value.trim(); render(); });
+    document.getElementById("catStatus").addEventListener("change", e => { status = e.target.value; render(); });
+
+    render();
+})();
+</script>

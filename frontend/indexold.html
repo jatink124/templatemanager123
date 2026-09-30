@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TemplateHub – Find the Perfect Website Template</title>
+    <meta name="description" content="Browse professional, modern and ready-to-use templates for every business.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { brand: '#2563EB', bgLight: '#FAFAFB' }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #FAFAFB; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="font-sans text-gray-800 antialiased selection:bg-brand selection:text-white flex flex-col min-h-screen">
+
+    <!-- ===================== Header & Nav ===================== -->
+    <header class="bg-white w-full border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-[1500px] mx-auto px-6 h-20 flex items-center justify-between gap-8">
+            
+            <!-- Logo & Nav Links -->
+            <div class="flex items-center gap-10 h-full">
+                <a href="#" onclick="showHome(event)" class="flex items-center gap-2 text-xl font-bold tracking-tight text-gray-900">
+                    <span class="bg-brand w-8 h-8 rounded-lg flex items-center justify-center text-white text-[18px] shadow-sm"><i class="ph-bold ph-diamonds-four"></i></span>
+                    TemplateHub
+                </a>
+                
+                <nav class="hidden lg:flex items-center h-full gap-8 text-[15px] font-medium text-gray-600">
+                    <a href="#" class="h-full flex items-center text-gray-900 border-b-2 border-brand font-semibold">Templates</a>
+                    <a href="#" class="h-full flex items-center hover:text-gray-900 transition-colors">Categories</a>
+                    <a href="#" class="h-full flex items-center hover:text-gray-900 transition-colors">How it Works</a>
+                    <a href="#" class="h-full flex items-center hover:text-gray-900 transition-colors">Pricing</a>
+                    <a href="#" class="h-full flex items-center hover:text-gray-900 transition-colors">Blog</a>
+                </nav>
+            </div>
+
+            <!-- Search & Actions -->
+            <div class="flex items-center gap-5 flex-1 justify-end">
+                <div class="hidden md:flex relative w-full max-w-[450px]">
+                    <i class="ph ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></i>
+                    <input id="search" type="text" placeholder="Search templates (e.g. restaurant, real estate...)"
+                        class="w-full bg-gray-100 border border-transparent rounded-full pl-11 pr-4 py-2.5 text-[14px] text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-white focus:border-gray-300 focus:ring-4 focus:ring-brand/10 transition-all">
+                </div>
+
+                <div class="flex items-center gap-4 border-l border-gray-200 pl-5">
+                    <button class="text-gray-500 hover:text-red-500 transition-colors">
+                        <i class="ph ph-heart text-2xl"></i>
+                    </button>
+                    <button class="relative text-gray-500 hover:text-gray-900 transition-colors">
+                        <i class="ph ph-shopping-cart text-2xl"></i>
+                        <span class="absolute -top-1.5 -right-1.5 bg-brand text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-white box-content">3</span>
+                    </button>
+                    <a href="dashboard.html" class="w-9 h-9 rounded-full bg-brand/10 text-brand flex items-center justify-center text-[13px] font-bold ml-2 hover:bg-brand/20 transition-colors">
+                        JK
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===================== Main Content Wrapper ===================== -->
+    <div id="home-main" class="max-w-[1500px] w-full mx-auto px-6 py-8 flex items-start gap-8 flex-grow">
+        
+        <!-- ===================== Left Sidebar ===================== -->
+        <aside class="w-64 shrink-0 hidden lg:flex flex-col gap-8 sticky top-28 h-[calc(100vh-8rem)] overflow-y-auto no-scrollbar pb-8">
+            
+            <!-- Categories Navigation -->
+            <div>
+                <div class="flex items-center justify-between mb-4 px-2">
+                    <h3 class="font-bold text-gray-900">Categories</h3>
+                    <button onclick="filterByCategory('all')" class="text-[13px] font-medium text-brand hover:underline">View all</button>
+                </div>
+                <nav id="sidebar-categories" class="flex flex-col">
+                    <!-- Populated dynamically by JavaScript -->
+                </nav>
+            </div>
+
+            <!-- Price Filters -->
+            <div>
+                <h3 class="font-bold text-gray-900 mb-4 px-2">Price</h3>
+                <div class="flex flex-col gap-3 px-2">
+                    <label class="flex items-center justify-between group cursor-pointer">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" id="price-all" checked onclick="filterByPrice('all')" class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                            <span class="text-[14px] font-medium text-gray-700 group-hover:text-gray-900">All</span>
+                        </div>
+                        <span id="count-all" class="text-[13px] text-gray-400">0</span>
+                    </label>
+                    <label class="flex items-center justify-between group cursor-pointer">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" id="price-free" onclick="filterByPrice('free')" class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                            <span class="text-[14px] font-medium text-gray-700 group-hover:text-gray-900">Free</span>
+                        </div>
+                        <span id="count-free" class="text-[13px] text-gray-400">0</span>
+                    </label>
+                    <label class="flex items-center justify-between group cursor-pointer">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" id="price-premium" onclick="filterByPrice('premium')" class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                            <span class="text-[14px] font-medium text-gray-700 group-hover:text-gray-900">Premium</span>
+                        </div>
+                        <span id="count-premium" class="text-[13px] text-gray-400">0</span>
+                    </label>
+                </div>
+            </div>
+
+          <!-- Feature Filters -->
+            <div>
+                <h3 class="font-bold text-gray-900 mb-4 px-2">Features</h3>
+                <div class="flex flex-col gap-3 px-2">
+                    <label class="flex items-center gap-3 group cursor-pointer">
+                        <input type="checkbox" value="responsive" onchange="toggleFeature(this)" class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                        <span class="text-[14px] font-medium text-gray-700 group-hover:text-gray-900">Responsive</span>
+                    </label>
+                    <label class="flex items-center gap-3 group cursor-pointer">
+                        <input type="checkbox" value="seo" onchange="toggleFeature(this)" class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                        <span class="text-[14px] font-medium text-gray-700 group-hover:text-gray-900">SEO Optimized</span>
+                    </label>
+                    <label class="flex items-center gap-3 group cursor-pointer">
+                        <input type="checkbox" value="customize" onchange="toggleFeature(this)" class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                        <span class="text-[14px] font-medium text-gray-700 group-hover:text-gray-900">Easy to Customize</span>
+                    </label>
+                    <label class="flex items-center gap-3 group cursor-pointer">
+                        <input type="checkbox" value="ecommerce" onchange="toggleFeature(this)" class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                        <span class="text-[14px] font-medium text-gray-700 group-hover:text-gray-900">E-commerce Ready</span>
+                    </label>
+                    <label class="flex items-center gap-3 group cursor-pointer">
+                        <input type="checkbox" value="booking" onchange="toggleFeature(this)" class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                        <span class="text-[14px] font-medium text-gray-700 group-hover:text-gray-900">Booking System</span>
+                    </label>
+                    <label class="flex items-center gap-3 group cursor-pointer">
+                        <input type="checkbox" value="multipage" onchange="toggleFeature(this)" class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                        <span class="text-[14px] font-medium text-gray-700 group-hover:text-gray-900">Multi-page</span>
+                    </label>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ===================== Right Content (Marketplace Grid) ===================== -->
+        <main class="flex-1 w-full min-w-0">
+            
+            <!-- Page Header & Sort Toolbar -->
+            <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8 pb-6 border-b border-gray-200">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight mb-2">Find the Perfect Website Template</h1>
+                    <p class="text-gray-500 text-[16px]">Professional, modern and ready-to-use templates for every business.</p>
+                </div>
+                <div class="flex items-center gap-4 shrink-0">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[13px] font-medium text-gray-500">Sort by</span>
+                        <div class="relative">
+                            <select id="filter-tabs" class="appearance-none bg-white border border-gray-200 rounded-lg pl-4 pr-10 py-2 text-[14px] font-semibold text-gray-800 shadow-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand cursor-pointer">
+                                <option value="popular">Popular</option>
+                                <option value="latest">Latest</option>
+                                <option value="trending">Trending</option>
+                            </select>
+                            <i class="ph ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center bg-gray-100 p-1 rounded-lg border border-gray-200">
+                        <button class="w-8 h-8 rounded-md bg-white text-brand shadow-sm flex items-center justify-center"><i class="ph-bold ph-squares-four text-lg"></i></button>
+                        <button class="w-8 h-8 rounded-md text-gray-500 hover:text-gray-900 flex items-center justify-center transition-colors"><i class="ph-bold ph-list text-lg"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Grid populated by Javascript -->
+            <div id="grid" class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 mb-16"></div>
+
+        </main>
+    </div>
+
+    <!-- ===================== Detail View (Hidden by Default) ===================== -->
+    <main id="detail-view" class="hidden max-w-[1200px] w-full mx-auto px-6 py-12 flex-grow">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h2 class="text-[28px] font-bold text-gray-900 tracking-tight">Template Detail</h2>
+                <p class="text-gray-500 mt-1">Everything you need to know in one place.</p>
+            </div>
+            <button onclick="showHome(event)" class="text-brand font-semibold hover:text-brand/80 flex items-center gap-1 transition-colors">
+                <i class="ph-bold ph-arrow-left"></i> Back to Templates
+            </button>
+        </div>
+        <div id="detail-content"></div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="store.js"></script>
+   <script>
+(function () {
+    let query = "";
+    let activeTab = "popular";
+    let activeCategory = "all";
+    let activePrice = "all"; 
+    let activeFeatures = []; // Start empty so no templates are hidden
+
+    // 1. Fetch only real templates from your database
+    function getAllTemplates() {
+        let list = typeof Store !== 'undefined' && Store.published ? [...Store.published()] : [];
+        // Optional: filter out the default 't1' and 't2' dummy placeholders from store.js
+        return list.filter(t => t.id !== 't1' && t.id !== 't2');
+    }
+
+    function visible() {
+        let list = getAllTemplates();
+
+        if (query) {
+            const q = query.toLowerCase();
+            list = list.filter(t =>
+                t.title.toLowerCase().includes(q) ||
+                (t.category || "").toLowerCase().includes(q) ||
+                (t.description || "").toLowerCase().includes(q) ||
+                (t.tags || []).join(" ").toLowerCase().includes(q)
+            );
+        }
+
+        if (activeCategory !== 'all') {
+            list = list.filter(t => (t.category || '').toLowerCase() === activeCategory.toLowerCase());
+        }
+
+        if (activePrice === 'free') {
+            list = list.filter(t => t.price === 0 || t.badge === 'Free');
+        } else if (activePrice === 'premium') {
+            list = list.filter(t => t.price > 0 || t.badge === 'Premium');
+        }
+
+        if (activeFeatures.length > 0) {
+            list = list.filter(t => {
+                // If template lacks features array, assume it doesn't match the filter
+                const tFeatures = t.features || []; 
+                return activeFeatures.every(f => tFeatures.includes(f));
+            });
+        }
+
+        switch (activeTab) {
+            case 'latest': list.sort((a, b) => Number(b.id) - Number(a.id)); break;
+            case 'trending': list.sort((a, b) => (b.downloads || 0) - (a.downloads || 0)); break;
+            case 'popular':
+            default: list.sort((a, b) => (b.rating || 5) - (a.rating || 5)); break;
+        }
+
+        return list;
+    }
+
+    window.filterByPrice = function(val) {
+        activePrice = val;
+        document.getElementById('price-all').checked = (val === 'all');
+        document.getElementById('price-free').checked = (val === 'free');
+        document.getElementById('price-premium').checked = (val === 'premium');
+        render();
+    };
+
+    window.toggleFeature = function(el) {
+        if (el.checked) {
+            if (!activeFeatures.includes(el.value)) activeFeatures.push(el.value);
+        } else {
+            activeFeatures = activeFeatures.filter(f => f !== el.value);
+        }
+        render();
+    };
+
+    function escapeHTML(str) {
+        return (str || '').replace(/[&<>'"]/g, tag => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+        }[tag] || tag));
+    }
+
+    function card(t) {
+        const isFree = t.price === 0 || t.badge === 'Free';
+        const badgeHtml = isFree 
+            ? `<span class="bg-green-50 text-green-600 text-[11px] font-bold px-2.5 py-1 rounded-md tracking-wide">Free</span>`
+            : `<span class="bg-blue-50 text-brand text-[11px] font-bold px-2.5 py-1 rounded-md tracking-wide">Premium</span>`;
+
+        const gallery = t.gallery && t.gallery.length >= 4 ? t.gallery : [t.image, t.image, t.image, t.image];
+        const thumbsHtml = gallery.slice(0, 4).map(img => 
+            `<div class="aspect-square bg-gray-100 rounded-md overflow-hidden border border-gray-200 cursor-pointer hover:border-brand transition-colors"><img src="${escapeHTML(img)}" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity"></div>`
+        ).join('');
+
+        return `
+        <article class="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <div class="relative aspect-[16/10] bg-gray-100 overflow-hidden cursor-pointer" onclick="showDetail('${t.id}')">
+                <img src="${escapeHTML(t.image || 'https://via.placeholder.com/400x250')}" alt="${escapeHTML(t.title)}" loading="lazy" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+            </div>
+            
+            <div class="p-5 flex flex-col flex-grow">
+                <div class="grid grid-cols-4 gap-2 mb-4">
+                    ${thumbsHtml}
+                </div>
+                
+                <div class="flex items-start justify-between gap-3 mb-1">
+                    <h3 class="text-[16px] font-bold text-gray-900 leading-tight cursor-pointer hover:text-brand transition-colors" onclick="showDetail('${t.id}')">${escapeHTML(t.title)}</h3>
+                    <div class="shrink-0 pt-0.5">${badgeHtml}</div>
+                </div>
+                
+                <div class="flex items-center justify-between mb-6">
+                    <p class="text-[13px] font-medium text-gray-500">${escapeHTML(t.category || 'Web Templates')}</p>
+                    <button class="text-gray-400 hover:text-red-500 transition-colors" title="Add to Wishlist">
+                        <i class="ph ph-heart text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3 mt-auto pt-1">
+                    <a href="preview.html?id=${t.id}" target="_blank" class="flex items-center justify-center bg-gray-50 hover:bg-gray-100 text-gray-700 text-[13px] font-bold py-2.5 rounded-lg border border-gray-200 transition-colors">
+                        Preview
+                    </a>
+                    <button onclick="downloadTemplate('${t.id}', event)" class="flex items-center justify-center bg-brand hover:bg-brand/90 text-white text-[13px] font-bold py-2.5 rounded-lg shadow-sm transition-colors">
+                        Use Template
+                    </button>
+                </div>
+            </div>
+        </article>`;
+    }
+
+    function render() {
+        const list = visible();
+        document.getElementById("grid").innerHTML = list.length
+            ? list.map(card).join("")
+            : `<div class="col-span-full bg-white border border-gray-200 rounded-2xl py-20 text-center">
+                   <div class="w-16 h-16 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-4"><i class="ph ph-magnifying-glass text-2xl"></i></div>
+                   <h3 class="font-bold text-gray-900 text-lg mb-1">No templates found</h3>
+                   <p class="text-[14px] text-gray-500">Try adjusting your search or category filters.</p>
+               </div>`;
+    }
+
+    window.filterByCategory = function(category) {
+        activeCategory = category;
+        renderCategories(); 
+        render();           
+    };
+
+    function renderCategories() {
+        const allTemplates = getAllTemplates();
+        
+        // 2. Map existing templates to group them dynamically
+        const categoryMap = {};
+        allTemplates.forEach(t => {
+            const catName = t.category || "Others";
+            if (!categoryMap[catName]) {
+                categoryMap[catName] = { name: catName, count: 0, icon: "ph-folder" };
+            }
+            categoryMap[catName].count++;
+        });
+
+        // Convert the map to an array and sort it alphabetically
+        const activeCats = Object.values(categoryMap).sort((a, b) => a.name.localeCompare(b.name));
+
+        const container = document.getElementById("sidebar-categories");
+        if (container) {
+            const totalCount = allTemplates.length;
+
+            let html = `<button data-cat="all" onclick="filterByCategory(this.dataset.cat)" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-[14px] ${activeCategory === 'all' ? 'bg-brand/10 text-brand font-bold' : 'text-gray-700 font-medium hover:bg-gray-50'} transition-colors mb-1">
+                <div class="flex items-center gap-3"><i class="ph-bold ph-squares-four text-lg"></i> All Templates</div>
+                <span class="text-xs ${activeCategory === 'all' ? 'text-brand' : 'text-gray-400'}">${totalCount}</span>
+            </button>`;
+            
+            // Only output categories that exist in the database
+            activeCats.forEach(c => {
+                const isActive = activeCategory.toLowerCase() === c.name.toLowerCase();
+                html += `<button data-cat="${escapeHTML(c.name)}" onclick="filterByCategory(this.dataset.cat)" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-[14px] ${isActive ? 'bg-brand/10 text-brand font-bold' : 'text-gray-700 font-medium hover:bg-gray-50'} transition-colors mb-1">
+                    <div class="flex items-center gap-3"><i class="ph ${escapeHTML(c.icon)} text-lg"></i> ${escapeHTML(c.name)}</div>
+                    <span class="text-xs ${isActive ? 'text-brand' : 'text-gray-400'}">${c.count}</span>
+                </button>`;
+            });
+            container.innerHTML = html;
+
+            // Render Sidebar Price Counts
+            const freeCount = allTemplates.filter(t => t.price === 0 || t.badge === 'Free').length;
+            const premiumCount = allTemplates.filter(t => t.price > 0 || t.badge === 'Premium').length;
+            
+            if (document.getElementById('count-free')) document.getElementById('count-free').textContent = freeCount;
+            if (document.getElementById('count-premium')) document.getElementById('count-premium').textContent = premiumCount;
+            if (document.getElementById('count-all')) document.getElementById('count-all').textContent = totalCount;
+        }
+    }
+
+    // --- Detail View Controls ---
+    window.changeDetailImg = function(dir) {
+        if (!window.currentGallery || window.currentGallery.length <= 1) return;
+        window.currentImgIndex = (window.currentImgIndex + dir + window.currentGallery.length) % window.currentGallery.length;
+        document.getElementById('mainDetailImg').src = window.currentGallery[window.currentImgIndex];
+    };
+
+    window.setDetailImg = function(index) {
+        if (!window.currentGallery || !window.currentGallery[index]) return;
+        window.currentImgIndex = index;
+        document.getElementById('mainDetailImg').src = window.currentGallery[window.currentImgIndex];
+    };
+
+    window.showDetail = function(id) {
+        const list = getAllTemplates();
+        const t = list.find(x => String(x.id) === String(id)) || list[0];
+
+        window.currentPreviewTemplate = t;
+        window.currentGallery = [t.image, ...(t.gallery || [t.image, t.image, t.image])].filter(Boolean);
+        window.currentImgIndex = 0;
+
+        document.getElementById('home-main').classList.add('hidden');
+        document.getElementById('detail-view').classList.remove('hidden');
+
+        const badgeHtml = t.price === 0 || t.badge === 'Free' 
+            ? `<span class="bg-green-50 text-green-600 text-xs font-bold px-2.5 py-1 rounded-md tracking-wide">Free</span>`
+            : `<span class="bg-blue-50 text-brand text-xs font-bold px-2.5 py-1 rounded-md tracking-wide">Premium</span>`;
+
+        const contentHtml = `
+            <div class="grid lg:grid-cols-3 gap-10">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-gray-100 rounded-2xl overflow-hidden relative border border-gray-200">
+                        <button onclick="changeDetailImg(-1)" class="absolute top-1/2 left-4 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md z-10 transition-colors"><i class="ph-bold ph-caret-left text-gray-700"></i></button>
+                        <button onclick="changeDetailImg(1)" class="absolute top-1/2 right-4 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md z-10 transition-colors"><i class="ph-bold ph-caret-right text-gray-700"></i></button>
+                        <img id="mainDetailImg" src="${escapeHTML(t.image)}" class="w-full aspect-[16/10] object-cover transition-opacity duration-300">
+                    </div>
+                    
+                    <div class="grid grid-cols-4 gap-4">
+                        ${ window.currentGallery.slice(0, 4).map((img, i) => `
+                        <div onclick="setDetailImg(${i})" class="aspect-[16/10] rounded-xl overflow-hidden bg-gray-100 cursor-pointer border-2 border-transparent hover:border-brand/50 transition-colors">
+                            <img src="${escapeHTML(img)}" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity">
+                        </div>`).join('') }
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="pt-2">
+                        <div class="flex items-start justify-between gap-4 mb-3">
+                            <h1 class="text-3xl font-extrabold text-gray-900 leading-tight">${escapeHTML(t.title)}</h1>
+                        </div>
+                        
+                        <div class="flex items-center gap-3 mb-6">
+                            ${badgeHtml}
+                            <span class="text-[14px] font-medium text-gray-500 border-l border-gray-200 pl-3">${escapeHTML(t.category || 'Web Templates')}</span>
+                        </div>
+                        
+                        <p class="text-gray-600 text-[15px] mb-8 leading-relaxed">
+                            ${escapeHTML(t.description || 'Professional, modern and ready-to-use template for your next business project. Clean code, fully responsive, and easy to customize.')}
+                        </p>
+                        
+                        <div class="flex flex-col gap-3 mb-8">
+                            <a href="preview.html?id=${t.id}" target="_blank" class="w-full flex items-center justify-center bg-gray-50 hover:bg-gray-100 text-gray-800 text-[15px] font-bold py-3.5 rounded-xl border border-gray-200 transition-colors gap-2">
+                                Live Preview <i class="ph-bold ph-arrow-square-out text-lg"></i>
+                            </a>
+                            <button onclick="downloadTemplate('${t.id}', event)" class="w-full flex items-center justify-center bg-brand hover:bg-brand/90 text-white text-[15px] font-bold py-3.5 rounded-xl shadow-sm transition-colors gap-2">
+                                Download Source <i class="ph-bold ph-download-simple text-lg"></i>
+                            </button>
+                             <button onclick="shareTemplate('${t.id}', event)" class="w-full flex items-center justify-center bg-white hover:bg-gray-50 text-brand text-[15px] font-bold py-3.5 rounded-xl border border-gray-200 transition-colors gap-2">
+                                Share Link <i class="ph-bold ph-share-network text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                        <h3 class="font-bold text-gray-900 mb-5">Template Features</h3>
+                        <div class="space-y-4 text-[14px]">
+                            <div class="flex items-center gap-3 text-gray-700 font-medium"><i class="ph-fill ph-check-circle text-brand text-lg"></i> Responsive Design</div>
+                            <div class="flex items-center gap-3 text-gray-700 font-medium"><i class="ph-fill ph-check-circle text-brand text-lg"></i> SEO Optimized</div>
+                            <div class="flex items-center gap-3 text-gray-700 font-medium"><i class="ph-fill ph-check-circle text-brand text-lg"></i> Clean & Commented Code</div>
+                            <div class="flex items-center gap-3 text-gray-700 font-medium"><i class="ph-fill ph-check-circle text-brand text-lg"></i> Easy to Customize</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById('detail-content').innerHTML = contentHtml;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.showHome = function(e) {
+        if(e) e.preventDefault();
+        document.getElementById('detail-view').classList.add('hidden');
+        document.getElementById('home-main').classList.remove('hidden');
+    };
+
+    document.getElementById("filter-tabs").addEventListener("change", e => { 
+        activeTab = e.target.value; 
+        render(); 
+    });
+
+    document.getElementById("search").addEventListener("input", e => { query = e.target.value.trim(); render(); });
+    
+    document.addEventListener("cm:changed", () => { renderCategories(); render(); });
+    document.addEventListener("cm:ready", () => { renderCategories(); render(); });
+
+    window.downloadTemplate = function(id, event) {
+        if(event) event.stopPropagation();
+        const list = getAllTemplates();
+        const t = list.find(x => String(x.id) === String(id)) || { title: 'Template' };
+        
+        const a = document.createElement('a');
+        a.href = t.fileUrl || 'data:text/plain;charset=utf-8,' + encodeURIComponent('Source code payload for ' + t.title);
+        a.download = t.title.toLowerCase().replace(/\s+/g, '-') + '.zip';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
+    window.shareTemplate = function(id, event) {
+        if(event) event.stopPropagation();
+        const url = new URL(window.location.href);
+        url.searchParams.set('preview', id);
+        
+        navigator.clipboard.writeText(url.toString()).then(() => {
+            alert('Shareable preview link copied: ' + url.toString());
+        }).catch(err => console.error('Failed to copy link', err));
+    };
+
+    // Initial load
+    renderCategories();
+    render();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const previewId = urlParams.get('preview');
+    if (previewId) {
+        showDetail(previewId);
+    }
+})();
+</script>

@@ -1,0 +1,172 @@
+<!-- My Templates (fragment loaded into dashboard.html) -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+    <div>
+        <h1 class="text-[1.75rem] font-bold text-gray-900 mb-2">My Templates</h1>
+        <p class="text-gray-500 text-sm">Manage uploaded templates, launch interactive SaaS previews, edit prices, and track performance.</p>
+    </div>
+    <button onclick="window.editTemplateId=null;loadPage('upload')" class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-lg font-medium text-sm shadow-sm flex items-center gap-2 whitespace-nowrap transition-colors">
+        <i class="ph-bold ph-plus"></i> Upload New Template
+    </button>
+</div>
+
+<div class="bg-white rounded-2xl border border-gray-100 shadow-[0_4px_24px_rgb(0,0,0,0.02)] overflow-hidden mb-10">
+
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between border-b border-gray-100 px-6 pt-4 gap-4">
+        <div id="tplTabs" class="flex gap-6 text-sm font-medium overflow-x-auto hide-scrollbar"></div>
+
+        <div class="flex items-center gap-3 pb-4">
+            <div class="relative w-64">
+                <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input id="tplSearch" type="text" placeholder="Search templates..." class="w-full bg-white border border-gray-200 rounded-lg pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-brand-500 shadow-sm transition-colors">
+            </div>
+            <select id="tplCategory" class="bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm shadow-sm focus:outline-none"></select>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead class="border-b border-gray-100 text-gray-800 bg-gray-50/50">
+                <tr>
+                    <th class="py-4 px-6 font-semibold">Template</th>
+                    <th class="py-4 px-6 font-semibold">Type</th>
+                    <th class="py-4 px-6 font-semibold">Price</th>
+                    <th class="py-4 px-6 font-semibold">Sales</th>
+                    <th class="py-4 px-6 font-semibold">Status</th>
+                    <th class="py-4 px-6 font-semibold text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tplBody" class="divide-y divide-gray-50"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+(function () {
+    let tab = "All";
+    let query = "";
+    let category = "all";
+
+    function counts() {
+        const all = Store.templates();
+        return {
+            All: all.length,
+            Published: all.filter(t => t.status === "Published").length,
+            Draft: all.filter(t => t.status === "Draft").length,
+        };
+    }
+
+    function renderTabs() {
+        const c = counts();
+        document.getElementById("tplTabs").innerHTML = Object.keys(c).map(k => `
+            <button data-tab="${k}" class="tab-btn pb-4 whitespace-nowrap border-b-2 transition-colors ${tab === k ? "text-brand-600 border-brand-600" : "text-gray-500 hover:text-gray-900 border-transparent"}">${k} (${c[k]})</button>`).join("");
+        document.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", () => { tab = b.dataset.tab; render(); }));
+    }
+
+    function renderCategorySelect() {
+        const sel = document.getElementById("tplCategory");
+        const current = sel.value || "all";
+        sel.innerHTML = `<option value="all">All Categories</option>` +
+            Store.categories().map(c => `<option value="${Store.escape(c.name)}">${Store.escape(c.name)}</option>`).join("");
+        sel.value = current;
+    }
+
+    function rows() {
+        let list = Store.templates();
+        if (tab !== "All") list = list.filter(t => t.status === tab);
+        if (category !== "all") list = list.filter(t => t.category === category);
+        if (query) {
+            const q = query.toLowerCase();
+            list = list.filter(t => t.title.toLowerCase().includes(q) || (t.tags || []).join(" ").toLowerCase().includes(q));
+        }
+        return list;
+    }
+
+    function render() {
+        renderTabs();
+        renderCategorySelect();
+        const list = rows();
+        
+        document.getElementById("tplBody").innerHTML = list.length ? list.map(t => {
+            // Label interactive vs static previews
+            const typeBadge = t.appData 
+                ? `<span class="bg-indigo-50 text-indigo-700 font-semibold px-2.5 py-1 rounded-md text-[11px]"><i class="ph-bold ph-lightning"></i> Interactive App</span>`
+                : `<span class="bg-gray-100 text-gray-600 font-semibold px-2.5 py-1 rounded-md text-[11px]">Static Layout</span>`;
+
+            return `
+            <tr class="hover:bg-gray-50/80 transition-colors group">
+                <td class="py-4 px-6">
+                    <div class="flex items-center gap-4">
+                        <img src="${Store.escape(t.image)}" alt="${Store.escape(t.title)}" class="w-14 h-10 rounded-md object-cover border border-gray-200">
+                        <div>
+                            <div class="font-semibold text-gray-900 text-[14px]">${Store.escape(t.title)}</div>
+                            <div class="text-[12px] text-gray-500 mt-0.5">${Store.escape(t.category)}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="py-4 px-6">${typeBadge}</td>
+                <td class="py-4 px-6 font-semibold text-gray-900">${Store.money(t.price)}</td>
+                <td class="py-4 px-6 text-gray-500">${t.sales || 0}</td>
+                <td class="py-4 px-6">${statusPill(t.status)}</td>
+                <td class="py-4 px-6 text-right whitespace-nowrap">
+                    <button data-preview="${t.id}" class="text-gray-400 hover:text-indigo-600 mr-3 transition-colors bg-gray-50 group-hover:bg-white px-2 py-1.5 rounded-lg border border-transparent group-hover:border-gray-200" title="Launch Preview"><i class="ph-bold ph-play-circle text-lg align-middle"></i> Launch</button>
+                    
+                    <button data-edit="${t.id}" class="text-gray-400 hover:text-brand-600 mr-3 transition-colors" title="Edit template"><i class="ph-bold ph-pencil-simple text-lg"></i></button>
+
+                    <button data-price="${t.id}" class="text-gray-400 hover:text-blue-600 mr-3 transition-colors" title="Quick price edit"><i class="ph-bold ph-currency-dollar text-lg"></i></button>
+
+                    
+                    <button data-toggle="${t.id}" class="text-gray-400 hover:text-green-600 mr-3 transition-colors" title="Publish / unpublish"><i class="ph-bold ${t.status === "Published" ? "ph-eye-slash" : "ph-upload-simple"} text-lg"></i></button>
+                    
+                    <button data-del="${t.id}" class="text-gray-400 hover:text-red-500 transition-colors" title="Delete"><i class="ph-bold ph-trash text-lg"></i></button>
+                </td>
+            </tr>`;
+        }).join("") : `<tr><td colspan="6" class="py-16 text-center text-gray-500">No templates match this filter.</td></tr>`;
+
+        // Attach event handlers
+        document.querySelectorAll("[data-preview]").forEach(b => b.addEventListener("click", () => {
+            Store.openPreview(b.dataset.preview);
+        }));
+        
+        document.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => {
+            if (confirm("Delete this template? It will be removed permanently.")) {
+                Store.removeTemplate(b.dataset.del);
+                render();
+                Store.toast("Template deleted");
+            }
+        }));
+        
+        document.querySelectorAll("[data-toggle]").forEach(b => b.addEventListener("click", () => {
+            const t = Store.template(b.dataset.toggle);
+            Store.updateTemplate(t.id, { status: t.status === "Published" ? "Draft" : "Published" });
+            render();
+            Store.toast(t.status === "Published" ? "Template moved to Drafts" : "Template Published");
+        }));
+        
+        document.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => {
+            window.editTemplateId = b.dataset.edit;
+            loadPage("upload");
+        }));
+
+        document.querySelectorAll("[data-price]").forEach(b => b.addEventListener("click", () => {
+            const t = Store.template(b.dataset.price);
+            const next = prompt("New price in USD for " + t.title, t.price);
+            if (next === null) return;
+            Store.updateTemplate(t.id, { price: Number(next) || 0 });
+            render();
+            Store.toast("Price updated");
+        }));
+
+    }
+
+    document.getElementById("tplSearch").addEventListener("input", e => { query = e.target.value.trim(); render(); });
+    document.getElementById("tplCategory").addEventListener("change", e => { category = e.target.value; render(); });
+
+    // Assuming statusPill is declared globally in the dashboard, if not here's a fallback UI element
+    window.statusPill = window.statusPill || function(status) {
+        if (status === 'Published') return `<span class="bg-green-50 text-green-700 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-green-100">Published</span>`;
+        return `<span class="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-gray-200">Draft</span>`;
+    };
+
+    render();
+})();
+</script>

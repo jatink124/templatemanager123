@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TemplateHub – Beautiful Templates for Every Business</title>
+    <meta name="description" content="Modern, customizable and ready-to-use website templates. Preview, customize and download — all in one place.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { brand: '#2563EB', bgLight: '#F8FAFC' }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8FAFC; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="font-sans text-gray-800 antialiased selection:bg-brand selection:text-white flex flex-col min-h-screen overflow-x-hidden">
+
+    <!-- ===================== Header ===================== -->
+    <header class="bg-white w-full border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-[1600px] mx-auto px-6 h-20 flex items-center justify-between gap-8">
+            
+            <!-- Logo -->
+            <a href="#" onclick="showHome(event)" class="flex items-center gap-2 text-[22px] font-extrabold tracking-tight text-gray-900 shrink-0">
+                <span class="bg-brand w-9 h-9 rounded-xl flex items-center justify-center text-white text-[20px] shadow-sm"><i class="ph-bold ph-diamonds-four"></i></span>
+                TemplateHub
+            </a>
+
+            <!-- Search Bar -->
+            <div class="hidden md:flex relative w-full max-w-2xl mx-8">
+                <i class="ph ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></i>
+                <input id="search" type="text" placeholder="Search templates (e.g. clinic, restaurant, law firm...)"
+                    class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-11 pr-20 py-3 text-[14px] text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-brand/30 focus:ring-4 focus:ring-brand/10 transition-all shadow-sm">
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[11px] font-bold text-gray-400 bg-white border border-gray-200 px-2 py-1 rounded-md shadow-sm">
+                    Ctrl K
+                </span>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-6 shrink-0">
+                <button class="flex items-center gap-2 text-[14px] font-semibold text-gray-600 hover:text-gray-900 transition-colors">
+                    <i class="ph ph-heart text-2xl text-gray-400"></i> Favorites
+                </button>
+                <button class="flex items-center gap-2 text-[14px] font-semibold text-gray-600 hover:text-gray-900 transition-colors relative">
+                    <div class="relative">
+                        <i class="ph ph-shopping-cart text-2xl text-gray-400"></i>
+                        <span class="absolute -top-1.5 -right-1.5 bg-brand text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-white box-content">3</span>
+                    </div>
+                    Cart
+                </button>
+                <a href="dashboard.html" class="w-10 h-10 rounded-full bg-brand/10 text-brand flex items-center justify-center text-[14px] font-bold ml-2 hover:bg-brand/20 transition-colors border border-brand/20">
+                    JK
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===================== Main Content Wrapper ===================== -->
+    <div id="home-main" class="max-w-[1600px] w-full mx-auto px-6 py-8 flex items-start gap-8 flex-grow">
+        
+        <!-- ===================== Left Sidebar ===================== -->
+        <aside class="w-64 shrink-0 hidden lg:flex flex-col gap-8 sticky top-28 h-[calc(100vh-8rem)] overflow-y-auto no-scrollbar pb-8">
+            
+            <!-- Categories Navigation -->
+            <div>
+                <h3 class="font-bold text-gray-900 mb-4 px-2">Categories</h3>
+                <nav id="sidebar-categories" class="flex flex-col">
+                    <!-- Populated dynamically by JavaScript -->
+                </nav>
+            </div>
+
+            <!-- Price Filters -->
+            <div>
+                <h3 class="font-bold text-gray-900 mb-4 px-2">Price</h3>
+                <div class="flex flex-col gap-3 px-2">
+                    <label class="flex items-center justify-between group cursor-pointer">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" id="price-all" checked onclick="filterByPrice('all')" class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                            <span class="text-[14px] font-medium text-gray-700 group-hover:text-gray-900">All</span>
+                        </div>
+                        <span id="count-all" class="text-[13px] text-gray-400">0</span>
+                    </label>
+                    <label class="flex items-center justify-between group cursor-pointer">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" id="price-free" onclick="filterByPrice('free')" class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                            <span class="text-[14px] font-medium text-gray-700 group-hover:text-gray-900">Free</span>
+                        </div>
+                        <span id="count-free" class="text-[13px] text-gray-400">0</span>
+                    </label>
+                    <label class="flex items-center justify-between group cursor-pointer">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" id="price-premium" onclick="filterByPrice('premium')" class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                            <span class="text-[14px] font-medium text-gray-700 group-hover:text-gray-900">Premium</span>
+                        </div>
+                        <span id="count-premium" class="text-[13px] text-gray-400">0</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Feature Filters -->
+            <div>
+                <h3 class="font-bold text-gray-900 mb-4 px-2">Features</h3>
+                <div class="flex flex-col gap-3 px-2">
+                    <label class="flex items-center gap-3 group cursor-pointer">
+                        <input type="checkbox" value="responsive" onchange="toggleFeature(this)" class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                        <span class="text-[14px] font-medium text-gray-700 group-hover:text-gray-900">Responsive</span>
+                    </label>
+                    <label class="flex items-center gap-3 group cursor-pointer">
+                        <input type="checkbox" value="seo" onchange="toggleFeature(this)" class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                        <span class="text-[14px] font-medium text-gray-700 group-hover:text-gray-900">SEO Optimized</span>
+                    </label>
+                    <label class="flex items-center gap-3 group cursor-pointer">
+                        <input type="checkbox" value="customize" onchange="toggleFeature(this)" class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                        <span class="text-[14px] font-medium text-gray-700 group-hover:text-gray-900">Easy to Customize</span>
+                    </label>
+                    <label class="flex items-center gap-3 group cursor-pointer">
+                        <input type="checkbox" value="ecommerce" onchange="toggleFeature(this)" class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                        <span class="text-[14px] font-medium text-gray-700 group-hover:text-gray-900">E-commerce Ready</span>
+                    </label>
+                    <label class="flex items-center gap-3 group cursor-pointer">
+                        <input type="checkbox" value="booking" onchange="toggleFeature(this)" class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                        <span class="text-[14px] font-medium text-gray-700 group-hover:text-gray-900">Booking System</span>
+                    </label>
+                    <label class="flex items-center gap-3 group cursor-pointer">
+                        <input type="checkbox" value="multipage" onchange="toggleFeature(this)" class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand accent-brand">
+                        <span class="text-[14px] font-medium text-gray-700 group-hover:text-gray-900">Multi-page</span>
+                    </label>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ===================== Right Content (Banner + Grid) ===================== -->
+        <main class="flex-1 w-full min-w-0 flex flex-col">
+            
+            <!-- Redesigned Hero Banner -->
+            <!-- Redesigned Hero Banner -->
+<section id="hero-banner" class="relative w-full bg-gradient-to-r from-[#F0F5FF] to-[#E2EEFF] rounded-2xl border border-blue-100 p-6 sm:p-8 lg:p-10 mb-8 flex flex-col xl:flex-row items-center justify-between overflow-hidden transition-all duration-300">
+                
+                <!-- Left Content (Text) -->
+                <div class="relative z-10 w-full xl:max-w-[480px] pb-6 xl:pb-0">
+                    <span class="inline-flex items-center bg-blue-100/80 text-brand text-[13px] font-bold px-4 py-1.5 rounded-full mb-5 tracking-wide shadow-sm border border-blue-200">
+                        Professional Website Templates
+                    </span>
+                    <h1 class="text-4xl lg:text-[42px] font-extrabold text-[#0B1120] tracking-tight leading-[1.1] mb-5 drop-shadow-sm">
+                        Beautiful Templates for<br>Every Business
+                    </h1>
+                    <p class="text-[15px] text-gray-600 font-medium mb-8 max-w-md leading-relaxed">
+                        Modern, customizable and ready-to-use website templates. Preview, customize and download — all in one place.
+                    </p>
+                    
+                    <!-- Feature Pills Row -->
+                    <div class="flex flex-wrap gap-y-3 gap-x-3 text-[12px] font-bold text-gray-700">
+                        <div class="flex items-center gap-1.5 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow-sm border border-gray-100"><i class="ph-fill ph-check-circle text-[#10B981] text-[16px]"></i> Free & Premium Templates</div>
+                        <div class="flex items-center gap-1.5 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow-sm border border-gray-100"><i class="ph-fill ph-check-circle text-[#10B981] text-[16px]"></i> Easy to Customize</div>
+                        <div class="flex items-center gap-1.5 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow-sm border border-gray-100"><i class="ph-fill ph-check-circle text-[#10B981] text-[16px]"></i> Modern & Responsive</div>
+                        <div class="flex items-center gap-1.5 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow-sm border border-gray-100"><i class="ph-fill ph-check-circle text-[#10B981] text-[16px]"></i> No Domain Needed</div>
+                    </div>
+                </div>
+
+                <!-- Right Content (Laptop + Card + Arrow completely contained) -->
+                <div class="relative z-10 w-full xl:w-[650px] 2xl:w-[750px] h-[350px] sm:h-[450px] flex flex-col sm:block items-center">
+                    
+                    <!-- Laptop Image -->
+                    <div class="sm:absolute left-0 top-1/2 sm:-translate-y-1/2 w-[90%] sm:w-[450px] z-10">
+                        <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=800" alt="Devices Mockup" class="w-full object-cover rounded-xl shadow-[0_15px_30px_-10px_rgba(0,0,0,0.3)] border-[6px] border-white bg-white">
+                    </div>
+
+                    <!-- White Features Box (Overlaps laptop) -->
+                    <div class="sm:absolute right-0 xl:right-[150px] top-1/2 sm:-translate-y-1/2 z-20 bg-white/95 backdrop-blur rounded-[20px] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] p-5 sm:p-6 w-[90%] sm:w-[280px] border border-gray-100 flex flex-col gap-4 mt-6 sm:mt-0">
+                        <div class="flex items-start gap-4">
+                            <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-brand shrink-0"><i class="ph-bold ph-desktop text-lg"></i></div>
+                            <div class="pt-0.5"><h4 class="font-bold text-gray-900 text-[13px] mb-0.5">Live Preview</h4><p class="text-[11px] text-gray-400 font-medium leading-tight">See how it looks on mobile</p></div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-brand shrink-0"><i class="ph-bold ph-pencil-simple text-lg"></i></div>
+                            <div class="pt-0.5"><h4 class="font-bold text-gray-900 text-[13px] mb-0.5">Customize Online</h4><p class="text-[11px] text-gray-400 font-medium leading-tight">Change colors, fonts</p></div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-9 h-9 rounded-xl bg-[#ECFDF5] flex items-center justify-center text-[#10B981] shrink-0"><i class="ph-bold ph-download-simple text-lg"></i></div>
+                            <div class="pt-0.5"><h4 class="font-bold text-gray-900 text-[13px] mb-0.5">Download Files</h4><p class="text-[11px] text-gray-400 font-medium leading-tight">Get clean source code</p></div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-9 h-9 rounded-xl bg-[#FEF2F2] flex items-center justify-center text-[#EF4444] shrink-0"><i class="ph-bold ph-heart text-lg"></i></div>
+                            <div class="pt-0.5"><h4 class="font-bold text-gray-900 text-[13px] mb-0.5">Save to Favorites</h4><p class="text-[11px] text-gray-400 font-medium leading-tight">Keep for later</p></div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-9 h-9 rounded-xl bg-[#F5F3FF] flex items-center justify-center text-[#8B5CF6] shrink-0"><i class="ph-bold ph-scales text-lg"></i></div>
+                            <div class="pt-0.5"><h4 class="font-bold text-gray-900 text-[13px] mb-0.5">Compare Templates</h4><p class="text-[11px] text-gray-400 font-medium leading-tight">Compare designs side by side</p></div>
+                        </div>
+                    </div>
+
+                    <!-- Hand-drawn arrow & text contained safely on far right -->
+                    <div class="absolute right-4 top-[20%] w-[130px] hidden 2xl:flex flex-col items-center gap-1 z-20 pointer-events-none">
+                        <p class="text-brand text-[12px] font-bold text-center leading-snug" style="font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;">Key features before buying domain & hosting</p>
+                        <svg width="45" height="40" viewBox="0 0 54 43" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-brand mr-4 mt-1">
+                            <path d="M52.5 1.5C52.5 1.5 40 10.5 35 23.5C31.42 32.793 25.5 37 17 38.5C9.554 39.813 1.5 38.5 1.5 38.5M1.5 38.5L8.5 31.5M1.5 38.5L8.5 41.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Sort Toolbar & Pills -->
+            <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-8 border-b border-gray-200 pb-6">
+                <!-- Dynamic Pills Container -->
+                <div class="flex items-center gap-3 overflow-x-auto no-scrollbar" id="filter-pills">
+                    <!-- Javascript populates pills here -->
+                </div>
+
+                <!-- Sort & List Views -->
+                <div class="flex items-center gap-4 shrink-0">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[13px] font-medium text-gray-500">Sort by:</span>
+                        <div class="relative">
+                            <select id="sort-dropdown" class="appearance-none bg-white border border-gray-200 rounded-lg pl-4 pr-10 py-2.5 text-[14px] font-bold text-gray-800 shadow-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand cursor-pointer">
+                                <option value="popular">Most Popular</option>
+                                <option value="latest">Newest First</option>
+                                <option value="trending">Trending Now</option>
+                            </select>
+                            <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center bg-white p-1 rounded-lg border border-gray-200 shadow-sm hidden sm:flex">
+                        <button class="w-9 h-9 rounded-md bg-blue-50 text-brand shadow-sm flex items-center justify-center"><i class="ph-bold ph-squares-four text-xl"></i></button>
+                        <button class="w-9 h-9 rounded-md text-gray-400 hover:text-gray-900 flex items-center justify-center transition-colors"><i class="ph-bold ph-list text-xl"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Templates Grid -->
+            <div id="grid" class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 mb-16"></div>
+
+        </main>
+    </div>
+
+    <!-- ===================== Bottom Features Banner ===================== -->
+    <div id="bottom-banner" class="mt-auto bg-white border-t border-gray-200 py-6">
+        <div class="max-w-[1600px] w-full mx-auto px-6 flex flex-col xl:flex-row items-center justify-between gap-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 flex-grow">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 border border-gray-100 shrink-0"><i class="ph-bold ph-heart text-2xl"></i></div>
+                    <div><h4 class="font-bold text-gray-900 text-[14px]">Save Favorites</h4><p class="text-[12px] text-gray-500">Keep templates for later</p></div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 border border-gray-100 shrink-0"><i class="ph-bold ph-scales text-2xl"></i></div>
+                    <div><h4 class="font-bold text-gray-900 text-[14px]">Compare Templates</h4><p class="text-[12px] text-gray-500">Compare up to 3 templates</p></div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 border border-gray-100 shrink-0"><i class="ph-bold ph-palette text-2xl"></i></div>
+                    <div><h4 class="font-bold text-gray-900 text-[14px]">Live Customizer (Demo)</h4><p class="text-[12px] text-gray-500">Try colors, fonts, and content</p></div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 border border-gray-100 shrink-0"><i class="ph-bold ph-file-arrow-down text-2xl"></i></div>
+                    <div><h4 class="font-bold text-gray-900 text-[14px]">Download Sample Files</h4><p class="text-[12px] text-gray-500">See folder structure before purchase</p></div>
+                </div>
+            </div>
+            <button class="shrink-0 w-full xl:w-auto bg-brand hover:bg-brand/90 text-white font-bold px-8 py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                Get Started for Free <i class="ph-bold ph-arrow-right text-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===================== Detail View (Hidden by Default) ===================== -->
+    <main id="detail-view" class="hidden max-w-[1200px] w-full mx-auto px-6 py-12 flex-grow">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h2 class="text-[28px] font-bold text-gray-900 tracking-tight">Template Detail</h2>
+                <p class="text-gray-500 mt-1">Everything you need to know in one place.</p>
+            </div>
+            <button onclick="showHome(event)" class="text-brand font-semibold hover:text-brand/80 flex items-center gap-1 transition-colors">
+                <i class="ph-bold ph-arrow-left"></i> Back to Templates
+            </button>
+        </div>
+        <div id="detail-content"></div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="store.js"></script>
+    <script>
+(function () {
+    let query = "";
+    let activeFilterType = "all"; 
+    let activeFilterValue = "all"; 
+    let activeCategory = "all"; 
+    let activeSort = "popular"; 
+    let activePrice = "all"; 
+    let activeFeatures = []; 
+
+    const mockTemplates = [
+        { id: 'm1', title: 'Plumbing Services', description: 'Clean & modern template for plumbing businesses.', category: 'Local Services', price: 0, badge: 'Free', downloads: 140, rating: 4.9, image: 'https://images.unsplash.com/photo-1607472586893-edb57cbbea42?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com', features: ['responsive', 'customize'] },
+        { id: 'm2', title: 'Dental Clinic', description: 'Professional template for dental clinics and healthcare.', category: 'Healthcare', price: 18, badge: 'Premium', downloads: 820, rating: 4.8, image: 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com', features: ['responsive', 'seo', 'booking'] },
+        { id: 'm3', title: 'Law Firm', description: 'Modern and professional template for law firms.', category: 'Legal', price: 25, badge: 'Premium', downloads: 1200, rating: 4.7, image: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com', features: ['responsive', 'customize'] },
+        { id: 'm4', title: 'Restaurant', description: 'Beautiful template for restaurants and cafes.', category: 'Restaurant & Food', price: 0, badge: 'Free', downloads: 650, rating: 4.6, image: 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com', features: ['responsive', 'multipage'] },
+        { id: 'm5', title: 'eCommerce Store', description: 'Modern online store template with shopping features.', category: 'E-commerce', price: 20, badge: 'Premium', downloads: 310, rating: 4.9, image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com', features: ['responsive', 'ecommerce', 'multipage'] },
+        { id: 'm6', title: 'Real Estate', description: 'Elegant template for real estate agencies.', category: 'Real Estate', price: 15, badge: 'Premium', downloads: 110, rating: 4.9, image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com', features: ['responsive', 'seo', 'booking'] },
+        { id: 'm7', title: 'Cleaning Services', description: 'Modern template for cleaning businesses.', category: 'Local Services', price: 0, badge: 'Free', downloads: 400, rating: 4.8, image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com', features: ['responsive', 'customize'] },
+        { id: 'm8', title: 'Pest Control', description: 'Professional template for pest control services.', category: 'Local Services', price: 20, badge: 'Premium', downloads: 200, rating: 4.5, image: 'https://images.unsplash.com/photo-1517409278788-b2a1a2e26090?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com', features: ['responsive', 'booking'] },
+        { id: 'm9', title: 'Gym & Fitness', description: 'Modern template for gyms and fitness trainers.', category: 'Health & Wellness', price: 0, badge: 'Free', downloads: 550, rating: 4.9, image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com', features: ['responsive', 'seo'] },
+        { id: 'm10', title: 'IT Services', description: 'Clean template for IT companies and agencies.', category: 'Technology', price: 30, badge: 'Premium', downloads: 900, rating: 4.8, image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com', features: ['responsive', 'seo', 'multipage'] }
+    ];
+
+  function getAllTemplates() {
+        let list = typeof Store !== 'undefined' && Store.published ? [...Store.published()] : [];
+        return list.filter(t => !['t1', 't2'].includes(t.id));
+    }
+
+    function visible() {
+        let list = getAllTemplates();
+
+        if (query) {
+            const q = query.toLowerCase();
+            list = list.filter(t =>
+                t.title.toLowerCase().includes(q) ||
+                (t.category || "").toLowerCase().includes(q) ||
+                (t.description || "").toLowerCase().includes(q)
+            );
+        }
+
+        if (activeCategory !== 'all') {
+            list = list.filter(t => (t.category || '').toLowerCase() === activeCategory.toLowerCase());
+        }
+
+        let priceTarget = activePrice;
+        if (activeFilterType === 'price') { priceTarget = activeFilterValue; }
+        
+        if (priceTarget === 'free') list = list.filter(t => t.price === 0 || t.badge === 'Free');
+        if (priceTarget === 'premium') list = list.filter(t => t.price > 0 || t.badge === 'Premium');
+
+        if (activeFeatures.length > 0) {
+            list = list.filter(t => {
+                const tFeatures = t.features || []; 
+                return activeFeatures.every(f => tFeatures.includes(f));
+            });
+        }
+
+        let sortMode = activeSort;
+        if (activeFilterType === 'sort') { sortMode = activeFilterValue; }
+        
+        switch (sortMode) {
+            case 'latest': list.sort((a, b) => Number(b.id) - Number(a.id)); break;
+            case 'trending': list.sort((a, b) => (b.downloads || 0) - (a.downloads || 0)); break;
+            case 'popular':
+            default: list.sort((a, b) => (b.rating || 5) - (a.rating || 5)); break;
+        }
+
+        return list;
+    }
+
+    window.setFilter = function(type, value) {
+        activeFilterType = type;
+        activeFilterValue = value;
+        
+        if (type === 'price' || type === 'all') {
+            activePrice = value;
+            document.getElementById('price-all').checked = (value === 'all');
+            document.getElementById('price-free').checked = (value === 'free');
+            document.getElementById('price-premium').checked = (value === 'premium');
+        }
+        if (type === 'sort') {
+            activeSort = value;
+            document.getElementById('sort-dropdown').value = value;
+        }
+
+        renderPills();
+        render();
+    };
+
+    window.filterByPrice = function(val) {
+        activePrice = val;
+        document.getElementById('price-all').checked = (val === 'all');
+        document.getElementById('price-free').checked = (val === 'free');
+        document.getElementById('price-premium').checked = (val === 'premium');
+        
+        if (val === 'all') setFilter('all', 'all');
+        if (val === 'free') setFilter('price', 'free');
+        if (val === 'premium') setFilter('price', 'premium');
+    };
+
+    window.toggleFeature = function(el) {
+        if (el.checked) {
+            if (!activeFeatures.includes(el.value)) activeFeatures.push(el.value);
+        } else {
+            activeFeatures = activeFeatures.filter(f => f !== el.value);
+        }
+        render();
+    };
+
+    function renderPills() {
+        const corePills = [
+            { id: 'all', type: 'all', label: 'All Templates', icon: 'ph-squares-four' },
+            { id: 'free', type: 'price', label: 'Free', icon: 'ph-gift' },
+            { id: 'premium', type: 'price', label: 'Premium', icon: 'ph-crown' },
+            { id: 'new', type: 'sort', label: 'New', icon: 'ph-sparkle' },
+            { id: 'popular', type: 'sort', label: 'Popular', icon: 'ph-fire' },
+            { id: 'trending', type: 'sort', label: 'Trending', icon: 'ph-trend-up' }
+        ];
+
+        const container = document.getElementById("filter-pills");
+        if (container) {
+            let html = ``;
+            corePills.forEach(p => {
+                const isActive = (activeFilterType === p.type && activeFilterValue === p.id) || (activeFilterType === 'all' && p.id === 'all');
+                
+                let colors = "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50";
+                if (isActive) {
+                    if (p.id === 'all') colors = "bg-brand text-white border border-brand";
+                    else if (p.id === 'free') colors = "bg-green-50 text-green-600 border border-green-200";
+                    else if (p.id === 'premium') colors = "bg-blue-50 text-brand border border-blue-200";
+                    else if (p.id === 'new') colors = "bg-orange-50 text-orange-600 border border-orange-200";
+                    else if (p.id === 'popular') colors = "bg-red-50 text-red-600 border border-red-200";
+                    else if (p.id === 'trending') colors = "bg-purple-50 text-purple-600 border border-purple-200";
+                } else {
+                    if (p.id === 'free') colors += " hover:text-green-600 hover:border-green-200";
+                    else if (p.id === 'premium') colors += " hover:text-brand hover:border-blue-200";
+                    else if (p.id === 'new') colors += " hover:text-orange-600 hover:border-orange-200";
+                    else if (p.id === 'popular') colors += " hover:text-red-600 hover:border-red-200";
+                    else if (p.id === 'trending') colors += " hover:text-purple-600 hover:border-purple-200";
+                    else colors += " hover:text-brand hover:border-brand/30";
+                }
+
+                html += `<button onclick="setFilter('${p.type}', '${p.id}')" class="shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-bold transition-all shadow-sm ${colors}">
+                    <i class="ph-bold ${p.icon} text-lg"></i> ${escapeHTML(p.label)}
+                </button>`;
+            });
+            container.innerHTML = html;
+        }
+    }
+
+    function escapeHTML(str) {
+        return (str || '').replace(/[&<>'"]/g, tag => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+        }[tag] || tag));
+    }
+
+    function card(t) {
+        const isFree = t.price === 0 || t.badge === 'Free';
+        const badgeHtml = isFree 
+            ? `<span class="bg-green-50 text-green-600 text-[11px] font-bold px-3 py-1.5 rounded-md tracking-wide">Free</span>`
+            : `<span class="bg-blue-50 text-brand text-[11px] font-bold px-3 py-1.5 rounded-md tracking-wide">Premium</span>`;
+
+        const gallery = t.gallery && t.gallery.length >= 4 ? t.gallery : [t.image, t.image, t.image, t.image];
+        const thumbsHtml = gallery.slice(0, 4).map(img => 
+            `<div class="aspect-square bg-gray-100 rounded-md overflow-hidden border border-gray-200 cursor-pointer hover:border-brand transition-colors"><img src="${escapeHTML(img)}" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity"></div>`
+        ).join('');
+
+        return `
+        <article class="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <div class="relative aspect-[16/10] bg-gray-100 overflow-hidden cursor-pointer border-b border-gray-100" onclick="showDetail('${t.id}')">
+                <img src="${escapeHTML(t.image || 'https://via.placeholder.com/400x250')}" alt="${escapeHTML(t.title)}" loading="lazy" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+            </div>
+            
+            <div class="p-6 flex flex-col flex-grow">
+                <div class="flex items-center justify-between mb-4">
+                    ${badgeHtml}
+                <button onclick="toggleGridLike(this, event, '${t.id}')" class="text-gray-400 hover:text-red-500 transition-colors" title="Add to Favorites">
+    <i class="ph ph-heart text-[22px]"></i>
+</button>
+                </div>
+                
+                <h3 class="text-[18px] font-extrabold text-gray-900 leading-tight cursor-pointer hover:text-brand transition-colors mb-1.5" onclick="showDetail('${t.id}')">${escapeHTML(t.title)}</h3>
+                <p class="text-[14px] text-gray-500 mb-8 line-clamp-2">${escapeHTML(t.description)}</p>
+                
+                <div class="grid grid-cols-2 gap-3 mt-auto">
+                    <a href="preview.html?id=${t.id}" target="_blank" class="flex items-center justify-center bg-white hover:bg-gray-50 text-gray-800 text-[14px] font-bold py-3 rounded-lg border border-gray-200 transition-colors shadow-sm">
+                        Preview
+                    </a>
+                    <button onclick="downloadTemplate('${t.id}', event)" class="flex items-center justify-center bg-brand hover:bg-brand/90 text-white text-[14px] font-bold py-3 rounded-lg shadow-sm transition-colors">
+                        Use Template
+                    </button>
+                </div>
+            </div>
+        </article>`;
+    }
+
+function render() {
+        const list = visible();
+        document.getElementById("grid").innerHTML = list.length
+            ? list.map(card).join("")
+            : `<div class="col-span-full bg-white border border-gray-200 rounded-2xl py-24 text-center shadow-sm">
+                   <div class="w-16 h-16 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-4"><i class="ph-bold ph-magnifying-glass text-2xl"></i></div>
+                   <h3 class="font-bold text-gray-900 text-xl mb-2">No templates found</h3>
+                   <p class="text-[15px] text-gray-500">Try selecting a different filter or search term.</p>
+               </div>`;
+
+        // NEW: Hide banner if a category, search, or filter is active
+        const banner = document.getElementById('hero-banner');
+        if (banner) {
+            const isFiltered = activeCategory !== 'all' || activePrice !== 'all' || query !== '' || activeFeatures.length > 0 || (activeFilterType !== 'all' && activeFilterType !== 'sort');
+            
+            if (isFiltered) {
+                banner.classList.add('hidden');
+            } else {
+                banner.classList.remove('hidden');
+            }
+        }
+    }
+
+    window.filterByCategory = function(category) {
+        activeCategory = category;
+        renderCategories(); 
+        render();           
+    };
+
+function renderCategories() {
+        const allTemplates = getAllTemplates();
+        
+        // 1. Fetch ONLY the real templates from your db.json
+        let dbList = typeof Store !== 'undefined' && Store.published ? [...Store.published()] : [];
+        const realTemplates = dbList.filter(t => !['t1', 't2'].includes(t.id));
+
+        const categoryMap = {};
+        
+        // 2. Build sidebar categories based ONLY on what is in db.json
+        realTemplates.forEach(t => {
+            const catName = t.category || "Others";
+            if (!categoryMap[catName]) {
+                categoryMap[catName] = { name: catName, icon: "ph-folder" };
+            }
+        });
+
+        const activeCats = Object.values(categoryMap).sort((a, b) => a.name.localeCompare(b.name));
+        const container = document.getElementById("sidebar-categories");
+        
+        if (container) {
+            const totalCount = allTemplates.length;
+            const isAllActive = activeCategory === 'all';
+
+            let html = `<button onclick="filterByCategory('all')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-[14px] ${isAllActive ? 'bg-brand/10 text-brand font-bold' : 'text-gray-700 font-medium hover:bg-gray-50'} transition-colors mb-1">
+                <div class="flex items-center gap-3"><i class="ph-bold ph-squares-four text-lg"></i> All Templates</div>
+                <span class="text-xs ${isAllActive ? 'text-brand' : 'text-gray-400'}">${totalCount}</span>
+            </button>`;
+            
+            activeCats.forEach(c => {
+                const isActive = activeCategory.toLowerCase() === c.name.toLowerCase();
+                
+                // Check counts against the grid display
+                const catCount = allTemplates.filter(t => (t.category || '').toLowerCase() === c.name.toLowerCase()).length;
+
+                // Safely format the category name for the onclick function
+                const safeCatName = (c.name || '').replace(/'/g, "\\'");
+
+                html += `<button onclick="filterByCategory('${safeCatName}')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-[14px] ${isActive ? 'bg-brand/10 text-brand font-bold' : 'text-gray-700 font-medium hover:bg-gray-50'} transition-colors mb-1">
+                    <div class="flex items-center gap-3"><i class="ph ${escapeHTML(c.icon)} text-lg"></i> ${escapeHTML(c.name)}</div>
+                    <span class="text-xs ${isActive ? 'text-brand' : 'text-gray-400'}">${catCount}</span>
+                </button>`;
+            });
+            container.innerHTML = html;
+
+            const freeCount = allTemplates.filter(t => t.price === 0 || t.badge === 'Free').length;
+            const premiumCount = allTemplates.filter(t => t.price > 0 || t.badge === 'Premium').length;
+            
+            if (document.getElementById('count-free')) document.getElementById('count-free').textContent = freeCount;
+            if (document.getElementById('count-premium')) document.getElementById('count-premium').textContent = premiumCount;
+            if (document.getElementById('count-all')) document.getElementById('count-all').textContent = totalCount;
+        }
+    }
+
+    // --- Detail View Controls ---
+    window.changeDetailImg = function(dir) {
+        if (!window.currentGallery || window.currentGallery.length <= 1) return;
+        window.currentImgIndex = (window.currentImgIndex + dir + window.currentGallery.length) % window.currentGallery.length;
+        document.getElementById('mainDetailImg').src = window.currentGallery[window.currentImgIndex];
+    };
+
+    window.setDetailImg = function(index) {
+        if (!window.currentGallery || !window.currentGallery[index]) return;
+        window.currentImgIndex = index;
+        document.getElementById('mainDetailImg').src = window.currentGallery[window.currentImgIndex];
+    };
+
+    window.showDetail = function(id) {
+        const list = getAllTemplates();
+        const t = list.find(x => String(x.id) === String(id)) || list[0];
+
+        window.currentPreviewTemplate = t;
+        window.currentGallery = [t.image, ...(t.gallery || [t.image, t.image, t.image])].filter(Boolean);
+        window.currentImgIndex = 0;
+
+        document.getElementById('home-main').classList.add('hidden');
+        document.getElementById('bottom-banner').classList.add('hidden');
+        document.getElementById('detail-view').classList.remove('hidden');
+
+        const badgeHtml = t.price === 0 || t.badge === 'Free' 
+            ? `<span class="bg-green-50 text-green-600 text-xs font-bold px-2.5 py-1 rounded-md tracking-wide">Free</span>`
+            : `<span class="bg-blue-50 text-brand text-xs font-bold px-2.5 py-1 rounded-md tracking-wide">Premium</span>`;
+
+        const contentHtml = `
+            <div class="grid lg:grid-cols-3 gap-10">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-gray-100 rounded-2xl overflow-hidden relative border border-gray-200">
+                        <button onclick="changeDetailImg(-1)" class="absolute top-1/2 left-4 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md z-10 transition-colors"><i class="ph-bold ph-caret-left text-gray-700"></i></button>
+                        <button onclick="changeDetailImg(1)" class="absolute top-1/2 right-4 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md z-10 transition-colors"><i class="ph-bold ph-caret-right text-gray-700"></i></button>
+                        <img id="mainDetailImg" src="${escapeHTML(t.image)}" class="w-full aspect-[16/10] object-cover transition-opacity duration-300">
+                    </div>
+                    
+                    <div class="grid grid-cols-4 gap-4">
+                        ${ window.currentGallery.slice(0, 4).map((img, i) => `
+                        <div onclick="setDetailImg(${i})" class="aspect-[16/10] rounded-xl overflow-hidden bg-gray-100 cursor-pointer border-2 border-transparent hover:border-brand/50 transition-colors">
+                            <img src="${escapeHTML(img)}" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity">
+                        </div>`).join('') }
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="pt-2">
+                        <div class="flex items-start justify-between gap-4 mb-3">
+                            <h1 class="text-3xl font-extrabold text-gray-900 leading-tight">${escapeHTML(t.title)}</h1>
+                        </div>
+                        
+                        <div class="flex items-center gap-3 mb-6">
+                            ${badgeHtml}
+                            <span class="text-[14px] font-medium text-gray-500 border-l border-gray-200 pl-3">${escapeHTML(t.category || 'Web Templates')}</span>
+                        </div>
+                        
+                        <p class="text-gray-600 text-[15px] mb-8 leading-relaxed">
+                            ${escapeHTML(t.description || 'Professional, modern and ready-to-use template for your next business project. Clean code, fully responsive, and easy to customize.')}
+                        </p>
+                        
+                    <!-- Default Action Buttons View -->
+<div id="action-buttons-view" class="flex flex-col gap-3 mb-8">
+    <div class="flex gap-3 mb-1">
+       <button onclick="toggleDetailLike(this)" class="flex-1 flex items-center justify-center bg-white hover:bg-gray-50 text-gray-700 text-[14px] font-bold py-3 rounded-xl border border-gray-200 transition-colors shadow-sm gap-2">
+    <i class="ph ph-heart text-xl"></i> <span>Like (24)</span>
+</button>
+        <a href="preview.html?id=${t.id}" target="_blank" class="flex-1 flex items-center justify-center bg-gray-50 hover:bg-gray-100 text-gray-800 text-[14px] font-bold py-3 rounded-xl border border-gray-200 transition-colors gap-2">
+            Preview
+        </a>
+    </div>
+    <button onclick="showContactForm()" class="w-full flex items-center justify-center bg-brand hover:bg-brand/90 text-white text-[15px] font-bold py-3.5 rounded-xl shadow-md transition-colors gap-2">
+        Contact for Work <i class="ph-bold ph-paper-plane-tilt text-lg"></i>
+    </button>
+</div>
+
+<!-- Let's Work Together Form (Hidden by default) -->
+<div id="contact-form-view" class="hidden mb-8 bg-[#FFF9F0] rounded-2xl p-6 border border-[#FFE4B5]">
+    <h3 class="text-xl font-extrabold text-gray-900 mb-1 flex items-center gap-2">
+        <i class="ph-fill ph-paper-plane-tilt text-brand"></i> Let's Work Together!
+    </h3>
+    <p class="text-[13px] text-gray-500 mb-5">Tell me about your project. I'll get back to you soon.</p>
+    
+    <div class="space-y-4">
+        <div>
+            <label class="block text-[12px] font-bold text-gray-700 mb-1">Your Name *</label>
+            <input type="text" placeholder="John Doe" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[14px] focus:outline-none focus:border-brand shadow-sm">
+        </div>
+        <div>
+            <label class="block text-[12px] font-bold text-gray-700 mb-1">Email *</label>
+            <input type="email" placeholder="john@example.com" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[14px] focus:outline-none focus:border-brand shadow-sm">
+        </div>
+        <div>
+            <label class="block text-[12px] font-bold text-gray-700 mb-1">Project Type *</label>
+            <select class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[14px] focus:outline-none focus:border-brand shadow-sm">
+                <option>Website using this template</option>
+                <option>Custom Web Development</option>
+                <option>UI/UX Design</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-[12px] font-bold text-gray-700 mb-1">Your Requirements *</label>
+            <textarea rows="3" placeholder="Tell me about your business and what you need..." class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[14px] focus:outline-none focus:border-brand shadow-sm resize-none"></textarea>
+        </div>
+        <div class="flex gap-3 pt-2">
+            <button onclick="hideContactForm()" class="flex-1 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 font-bold py-3 rounded-lg text-[14px] shadow-sm transition-colors">Cancel</button>
+            <button onclick="submitContactForm()" class="flex-1 bg-brand hover:bg-brand/90 text-white font-bold py-3 rounded-lg text-[14px] shadow-md transition-colors">Send Message</button>
+        </div>
+    </div>
+</div>
+
+<!-- Success Screen (Hidden by default) -->
+<div id="contact-success-view" class="hidden mb-8 bg-[#F4F2FF] rounded-2xl p-8 border border-purple-100 text-center shadow-sm">
+    <div class="w-14 h-14 bg-[#10B981] text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
+        <i class="ph-bold ph-check text-2xl"></i>
+    </div>
+    <h3 class="text-2xl font-bold text-gray-900 mb-2">Message Sent!</h3>
+    <p class="text-[14px] text-gray-600 mb-6">Thank you for reaching out.<br>I'll get back to you within 24 hours.</p>
+    <button onclick="hideContactForm()" class="bg-white hover:bg-gray-50 border border-gray-200 text-gray-800 font-bold py-2.5 px-6 rounded-lg text-[14px] shadow-sm transition-colors mb-6">
+        Back to Templates
+    </button>
+    <div class="text-left bg-white p-5 rounded-xl border border-gray-100 inline-block text-[13px] text-gray-600 w-full shadow-sm">
+        <p class="font-bold text-gray-800 mb-2.5 flex items-center gap-1.5"><i class="ph-bold ph-envelope-simple text-gray-400"></i> You will receive:</p>
+        <ul class="space-y-2 ml-1">
+            <li class="flex items-center gap-2"><i class="ph-bold ph-check text-brand"></i> Name & Email</li>
+            <li class="flex items-center gap-2"><i class="ph-bold ph-check text-brand"></i> Project type</li>
+            <li class="flex items-center gap-2"><i class="ph-bold ph-check text-brand"></i> Requirement details</li>
+            <li class="flex items-start gap-2"><i class="ph-bold ph-check text-brand mt-0.5"></i> <span>You can reply directly and start the conversation.</span></li>
+        </ul>
+    </div>
+</div>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                        <h3 class="font-bold text-gray-900 mb-5">Template Features</h3>
+                        <div class="space-y-4 text-[14px]">
+                            <div class="flex items-center gap-3 text-gray-700 font-medium"><i class="ph-fill ph-check-circle text-brand text-lg"></i> Responsive Design</div>
+                            <div class="flex items-center gap-3 text-gray-700 font-medium"><i class="ph-fill ph-check-circle text-brand text-lg"></i> SEO Optimized</div>
+                            <div class="flex items-center gap-3 text-gray-700 font-medium"><i class="ph-fill ph-check-circle text-brand text-lg"></i> Clean & Commented Code</div>
+                            <div class="flex items-center gap-3 text-gray-700 font-medium"><i class="ph-fill ph-check-circle text-brand text-lg"></i> Easy to Customize</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+      document.getElementById('detail-content').innerHTML = contentHtml;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }; // <-- Properly closes showDetail immediately
+
+    // --- Interactive Form & Button Logic ---
+  window.showContactForm = function() {
+        document.getElementById('action-buttons-view').classList.add('hidden');
+        document.getElementById('contact-form-view').classList.remove('hidden');
+        // Automatically scroll down to the form
+        setTimeout(() => {
+            document.getElementById('contact-form-view').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+    };
+
+    window.hideContactForm = function() {
+        document.getElementById('contact-form-view').classList.add('hidden');
+        document.getElementById('contact-success-view').classList.add('hidden');
+        document.getElementById('action-buttons-view').classList.remove('hidden');
+    };
+
+    window.submitContactForm = function() {
+        document.getElementById('contact-form-view').classList.add('hidden');
+        document.getElementById('contact-success-view').classList.remove('hidden');
+    };
+
+    window.toggleGridLike = function(btn, event, id) {
+        if(event) event.stopPropagation(); 
+        
+        // 1. Visually fill the heart with red
+        const icon = btn.querySelector('i');
+        icon.classList.add('ph-fill', 'text-red-500');
+        icon.classList.remove('ph', 'text-gray-400');
+        
+        // 2. Open the template details page
+        showDetail(id);
+        
+        // 3. Instantly trigger the "Contact for Work" form
+        showContactForm();
+    };
+
+    window.toggleDetailLike = function(btn) {
+        // 1. Visually mark as liked
+        const icon = btn.querySelector('i');
+        const span = btn.querySelector('span');
+        
+        icon.classList.add('ph-fill', 'text-red-500');
+        icon.classList.remove('ph');
+        
+        btn.classList.add('bg-red-50', 'border-red-100', 'text-red-500');
+        btn.classList.remove('bg-white', 'border-gray-200', 'text-gray-700');
+        span.innerText = 'Liked (25)';
+
+        // 2. Instantly trigger the "Contact for Work" form
+        showContactForm();
+    };
+
+    window.showHome = function(e) {
+        if(e) e.preventDefault();
+        document.getElementById('detail-view').classList.add('hidden');
+        document.getElementById('home-main').classList.remove('hidden');
+        document.getElementById('bottom-banner').classList.remove('hidden');
+    };
+
+    document.getElementById("sort-dropdown").addEventListener("change", e => { 
+        activeSort = e.target.value; 
+        if(activeSort === 'popular') setFilter('sort', 'popular');
+        else if(activeSort === 'latest') setFilter('sort', 'new');
+        else if(activeSort === 'trending') setFilter('sort', 'trending');
+        else render(); 
+    });
+
+    document.getElementById("search").addEventListener("input", e => { query = e.target.value.trim(); render(); });
+    
+    document.addEventListener("cm:changed", () => { renderPills(); renderCategories(); render(); });
+    document.addEventListener("cm:ready", () => { renderPills(); renderCategories(); render(); });
+
+    window.downloadTemplate = function(id, event) {
+        if(event) event.stopPropagation();
+        const list = getAllTemplates();
+        const t = list.find(x => String(x.id) === String(id)) || { title: 'Template' };
+        
+        const a = document.createElement('a');
+        a.href = t.fileUrl || 'data:text/plain;charset=utf-8,' + encodeURIComponent('Source code payload for ' + t.title);
+        a.download = t.title.toLowerCase().replace(/\s+/g, '-') + '.zip';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
+    window.shareTemplate = function(id, event) {
+        if(event) event.stopPropagation();
+        const url = new URL(window.location.href);
+        url.searchParams.set('preview', id);
+        
+        navigator.clipboard.writeText(url.toString()).then(() => {
+            alert('Shareable preview link copied: ' + url.toString());
+        }).catch(err => console.error('Failed to copy link', err));
+    };
+
+    renderPills();
+    renderCategories();
+    render();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const previewId = urlParams.get('preview');
+    if (previewId) {
+        showDetail(previewId);
+    }
+})();
+</script>
+</body>
+</html>

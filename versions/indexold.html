@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeMarket – Browse Premium Website & Dashboard Templates</title>
+    <meta name="description" content="Browse available website, admin and eCommerce templates with instant live previews, screenshots and clean, easy to customize code.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { dark: '#0B051D', brand: '#7C3AED', bgLight: '#FAFAFB' }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #FAFAFB; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="font-sans text-gray-800 antialiased selection:bg-brand selection:text-white flex flex-col min-h-screen">
+
+    <!-- ===================== Header & Nav ===================== -->
+    <header class="bg-gradient-to-br from-dark via-[#150a33] to-dark text-white w-full overflow-hidden border-b border-white/5">
+        <div class="max-w-[1400px] mx-auto">
+            
+            <!-- Navigation -->
+            <nav class="flex items-center justify-between px-6 py-5">
+                <div class="flex items-center gap-8">
+                    <a href="#" onclick="showHome()" class="flex items-center gap-2 text-xl font-bold tracking-tight">
+                        <span class="bg-brand w-8 h-8 rounded-lg flex items-center justify-center text-[15px]"><i class="ph-bold ph-code"></i></span>
+                        CodeMarket
+                    </a>
+                    
+                    <!-- Browse Categories Dropdown -->
+                    <div class="relative group hidden lg:block z-50">
+                        <button class="flex items-center gap-2 text-sm font-medium text-gray-200 hover:text-white transition-colors py-2">
+                            Browse Categories <i class="ph ph-caret-down transition-transform group-hover:rotate-180"></i>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div class="absolute left-0 top-full mt-1 w-56 bg-white rounded-xl shadow-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-hidden">
+                            <div class="py-2">
+                                <a href="#" class="group/item flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-brand transition-colors">
+                                    <i class="ph ph-browser text-lg text-gray-400 group-hover/item:text-brand transition-colors"></i> Web Templates
+                                </a>
+                                <a href="#" class="group/item flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-brand transition-colors">
+                                    <i class="ph ph-squares-four text-lg text-gray-400 group-hover/item:text-brand transition-colors"></i> Admin Templates
+                                </a>
+                                <a href="#" class="group/item flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-brand transition-colors">
+                                    <i class="ph ph-file-text text-lg text-gray-400 group-hover/item:text-brand transition-colors"></i> Landing Pages
+                                </a>
+                                <a href="#" class="group/item flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-brand transition-colors">
+                                    <i class="ph ph-shopping-cart text-lg text-gray-400 group-hover/item:text-brand transition-colors"></i> eCommerce
+                                </a>
+                                <a href="#" class="group/item flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-brand transition-colors">
+                                    <i class="ph ph-intersect text-lg text-gray-400 group-hover/item:text-brand transition-colors"></i> UI Kits
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Search Bar -->
+                <div class="hidden md:flex relative w-[300px] xl:w-[400px]">
+                    <i class="ph ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></i>
+                    <input type="text" placeholder="Search templates..."
+                        class="w-full bg-white/5 border border-white/10 rounded-full pl-11 pr-14 py-2.5 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-brand/60 transition-colors">
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] font-bold text-gray-400 bg-white/10 px-2 py-1 rounded border border-white/10">
+                        <i class="ph ph-command"></i> K
+                    </span>
+                </div>
+
+                <div class="flex items-center gap-6">
+                    <a href="dashboard.html" class="hidden sm:block text-sm font-medium text-gray-200 hover:text-white transition-colors">Sell Your Template</a>
+                    
+                    <button class="relative text-gray-200 hover:text-white transition-colors">
+                        <i class="ph ph-shopping-cart text-2xl"></i>
+                        <span class="absolute -top-1 -right-1 bg-brand text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-dark">0</span>
+                    </button>
+
+                    <div class="flex items-center gap-4 border-l border-white/10 pl-6">
+                        <a href="#" class="hidden sm:block text-sm font-medium text-gray-200 hover:text-white transition-colors">Log in</a>
+                        <a href="#" class="bg-brand hover:bg-brand/90 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">Sign Up</a>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Hero Content (Hidden on Detail View) -->
+            <div id="home-hero" class="px-6 pt-16 pb-24 grid lg:grid-cols-2 gap-12 items-center">
+                <div class="text-left z-10">
+                    <h1 class="text-5xl sm:text-6xl font-extrabold tracking-tight leading-[1.15]">
+                        Premium Templates.<br>
+                        Built to <span class="text-brand">Inspire.</span>
+                    </h1>
+                    <p class="mt-6 text-lg text-gray-300 font-medium">
+                        Clean code. Modern design. Easy to customize.
+                    </p>
+                    
+                    <div class="relative max-w-xl mt-10 flex items-center bg-[#130b2e] border border-white/10 rounded-full p-1.5 focus-within:border-brand/50 transition-colors">
+                        <input id="search" type="text" placeholder="Find the perfect template for your next project..."
+                            class="w-full bg-transparent pl-5 pr-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none">
+                        <button class="bg-brand hover:bg-brand/90 text-white w-12 h-10 rounded-full flex items-center justify-center transition-colors shrink-0">
+                            <i class="ph ph-magnifying-glass text-lg"></i>
+                        </button>
+                    </div>
+
+                    <div class="mt-10 flex flex-wrap items-center gap-6 sm:gap-8 text-sm font-medium text-gray-300">
+                        <div class="flex items-center gap-2"><i class="ph ph-shield-check text-xl"></i> Quality Checked</div>
+                        <div class="flex items-center gap-2"><i class="ph-bold ph-code text-xl"></i> Clean & Modern Code</div>
+                        <div class="flex items-center gap-2"><i class="ph ph-headphones text-xl"></i> Reliable Support</div>
+                    </div>
+                </div>
+
+                <div class="relative hidden lg:block w-full">
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-brand/30 blur-[100px] rounded-full pointer-events-none"></div>
+                    <img src="frontend-herosection.png" alt="Premium Templates Showcase" class="w-full h-auto max-h-[500px] object-contain relative z-10 scale-105 origin-right drop-shadow-2xl rounded-lg" onerror="this.src='https://via.placeholder.com/800x500?text=Hero+Graphic'">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===================== Main Content (List View) ===================== -->
+    <main id="home-main" class="max-w-[1400px] w-full mx-auto px-6 py-12 flex-grow">
+        
+        <!-- Static Categories -->
+       <!-- Dynamic Categories Grid (Populated by JS) -->
+        <div id="top-category-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-16">
+            <!-- Populated dynamically by JavaScript -->
+        </div>
+
+        
+       <!-- Template Marketplace Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+    <div>
+        <h2 class="text-[22px] font-bold text-gray-900 tracking-tight">Template Marketplace</h2>
+        <p class="text-gray-500 text-sm mt-0.5">Discover our handpicked collection of premium templates.</p>
+    </div>
+    <div class="flex items-center gap-4">
+        <!-- Dynamic Filter / Sort Tabs -->
+        <div id="filter-tabs" class="hidden sm:flex bg-gray-100/80 p-1 rounded-lg border border-gray-100">
+            <button data-tab="trending" class="tab-btn bg-brand text-white text-[13px] font-semibold px-4 py-1.5 rounded-md shadow-sm transition-all">Trending</button>
+            <button data-tab="latest" class="tab-btn text-gray-600 hover:text-gray-900 text-[13px] font-medium px-4 py-1.5 rounded-md transition-all">Latest</button>
+            <button data-tab="best-selling" class="tab-btn text-gray-600 hover:text-gray-900 text-[13px] font-medium px-4 py-1.5 rounded-md transition-all">Best Selling</button>
+        </div>
+        <a href="#" onclick="filterByCategory('all'); return false;" class="text-sm font-semibold text-brand hover:text-brand/80 flex items-center gap-1 transition-colors whitespace-nowrap">
+            View All <i class="ph-bold ph-arrow-right"></i>
+        </a>
+    </div>
+</div>
+<!-- Category Filters -->
+<!-- Dynamic Category Filters (Populated by JS) -->
+        <div id="category-filters" class="flex items-center gap-3 overflow-x-auto no-scrollbar mb-6 pb-2">
+            <!-- Populated dynamically by JavaScript -->
+        </div>
+        <!-- Dynamic Grid populated by Javascript -->
+        <div id="grid" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-16"></div>
+
+        <!-- Bottom CTA Banner -->
+        <div class="bg-[#f8f6fe] rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-8 border border-brand/10">
+            <div class="flex flex-wrap items-center gap-8 lg:gap-16">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-brand/10 flex items-center justify-center text-brand text-2xl"><i class="ph ph-stack"></i></div>
+                    <div><div class="text-xl font-bold text-gray-900">10K+</div><div class="text-sm text-gray-500">Templates</div></div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-brand/10 flex items-center justify-center text-brand text-2xl"><i class="ph ph-smiley"></i></div>
+                    <div><div class="text-xl font-bold text-gray-900">25K+</div><div class="text-sm text-gray-500">Happy Customers</div></div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-brand/10 flex items-center justify-center text-brand text-2xl"><i class="ph ph-shield-check"></i></div>
+                    <div><div class="text-xl font-bold text-gray-900">100%</div><div class="text-sm text-gray-500">Secure Payments</div></div>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center gap-6">
+              <div class="text-center sm:text-right">
+    <div class="text-lg font-bold text-gray-900">Join the Community.</div>
+    <div class="text-sm text-gray-500 max-w-[250px]">Get early access to our newest premium HTML and Tailwind templates.</div>
+</div>
+<button class="bg-brand hover:bg-brand/90 text-white font-medium px-6 py-3 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap">
+    <i class="ph ph-envelope-simple text-lg"></i> Subscribe for Updates
+</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- ===================== Detail View (Hidden by Default) ===================== -->
+    <main id="detail-view" class="hidden max-w-[1400px] w-full mx-auto px-6 py-12 flex-grow">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h2 class="text-[28px] font-bold text-gray-900 tracking-tight">Template Detail</h2>
+                <p class="text-gray-500 mt-1">Everything you need to know in one place.</p>
+            </div>
+            <button onclick="showHome()" class="text-brand font-semibold hover:text-brand/80 flex items-center gap-1 transition-colors">
+                Back to Templates <i class="ph-bold ph-arrow-right"></i>
+            </button>
+        </div>
+        <div id="detail-content"></div>
+    </main>
+
+    <!-- ===================== Footer ===================== -->
+    <footer class="bg-dark text-gray-400 mt-auto">
+        <div class="max-w-[1400px] mx-auto px-6 py-8 flex flex-col md:flex-row md:items-center justify-between gap-4 text-sm border-t border-white/5">
+            <div class="flex items-center gap-2 text-white font-semibold">
+                <span class="bg-brand w-7 h-7 rounded-lg flex items-center justify-center"><i class="ph-bold ph-code"></i></span>
+                CodeMarket
+            </div>
+            <a href="dashboard.html" class="text-white font-semibold hover:text-brand transition-colors">Go to Seller Dashboard →</a>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="store.js"></script>
+    <script>
+(function () {
+    let query = "";
+    let activeTab = "trending";
+    let activeCategory = "all";
+
+    function visible() {
+        let list = typeof Store !== 'undefined' && Store.published ? [...Store.published()] : [];
+        
+        // Mock fallback data
+        if (list.length === 0) {
+            list = [
+                { id: '1', title: 'SAAS Pro', category: 'Web Templates', price: 12, badge: 'NEW', downloads: 140, rating: 4.9, image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800' },
+                { id: '2', title: 'Business Pro', category: 'Landing Pages', price: 18, badge: 'HOT', downloads: 820, rating: 4.8, image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800' },
+                { id: '3', title: 'ShopCart', category: 'eCommerce', price: 24, badge: 'TRENDING', downloads: 1200, rating: 4.7, image: 'https://images.unsplash.com/photo-1555421689-d68471e189f2?auto=format&fit=crop&q=80&w=800' },
+                { id: '4', title: 'AdminX Dashboard', category: 'Admin Templates', price: 20, badge: 'POPULAR', downloads: 650, rating: 4.6, image: 'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?auto=format&fit=crop&q=80&w=800' },
+                { id: '5', title: 'Minimal UI Kit', category: 'UI Kits', price: 15, badge: 'NEW', downloads: 310, rating: 4.9, image: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&q=80&w=800' }
+            ];
+        }
+
+        // 1. Filter by Search Query
+        if (query) {
+            const q = query.toLowerCase();
+            list = list.filter(t =>
+                t.title.toLowerCase().includes(q) ||
+                (t.category || "").toLowerCase().includes(q) ||
+                (t.description || "").toLowerCase().includes(q) ||
+                (t.tags || []).join(" ").toLowerCase().includes(q)
+            );
+        }
+
+        // 2. Filter by Category (if selected)
+        if (activeCategory !== 'all') {
+            list = list.filter(t => (t.category || '').toLowerCase() === activeCategory.toLowerCase());
+        }
+
+        // 3. Sort & Filter by Active Tab
+        switch (activeTab) {
+            case 'latest':
+                // Sort by ID descending or newest items first
+                list.sort((a, b) => Number(b.id) - Number(a.id));
+                break;
+            case 'best-selling':
+                // Sort by downloads or sales count
+                list.sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
+                break;
+            case 'trending':
+            default:
+                // Sort by rating or default priority
+                list.sort((a, b) => (b.rating || 5) - (a.rating || 5));
+                break;
+        }
+
+        return list;
+    }
+
+    function escapeHTML(str) {
+        return (str || '').replace(/[&<>'"]/g, tag => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+        }[tag] || tag));
+    }
+
+    function card(t) {
+        const badge = t.badge || (t.id === '1' ? 'NEW' : '');
+
+        return `
+        <article onclick="showDetail('${t.id}')" class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all overflow-hidden flex flex-col cursor-pointer pb-2">
+            <div class="relative aspect-[16/10] bg-gray-100 overflow-hidden">
+                <img src="${escapeHTML(t.image || 'https://via.placeholder.com/400x250')}" alt="${escapeHTML(t.title)}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                ${badge ? `<span class="absolute top-3 left-3 bg-brand text-white text-[10px] font-bold px-2.5 py-1 rounded tracking-wide uppercase">${escapeHTML(badge)}</span>` : ''}
+                <button class="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-gray-600 hover:text-brand hover:bg-white transition-colors shadow-sm" onclick="event.stopPropagation();">
+                    <i class="ph ph-heart text-lg"></i>
+                </button>
+            </div>
+            <div class="p-4 flex flex-col flex-grow">
+                <h3 class="text-[15px] font-bold text-gray-900 leading-tight">${escapeHTML(t.title)}</h3>
+                <p class="mt-1 text-sm text-gray-500">${escapeHTML(t.category || 'Web Templates')}</p>
+                <div class="mt-4 flex items-center justify-between mt-auto">
+                   <div class="flex items-center gap-4">
+                        <span class="text-[12px] font-bold text-brand bg-brand/10 px-2.5 py-1 rounded-md uppercase tracking-wide">Free</span>
+                        <div class="flex items-center gap-1 text-[13px] text-gray-500 font-medium">
+                            <i class="ph-fill ph-star text-yellow-400 text-sm"></i>
+                            <span>${t.rating || '4.8'} (${t.downloads || 120})</span>
+                        </div>
+                    </div>
+                 <div class="flex items-center gap-2">
+    <button class="transition-colors text-gray-400 hover:text-brand" onclick="shareTemplate('${t.id}', event)" title="Share Template">
+        <i class="ph ph-share-network text-xl"></i>
+    </button>
+    <button class="transition-colors text-gray-400 hover:text-brand" onclick="downloadTemplate('${t.id}', event)" title="Download Source">
+        <i class="ph ph-download-simple text-xl"></i>
+    </button>
+</div>
+                </div>
+            </div>
+        </article>`;
+    }
+
+    function render() {
+        const list = visible();
+        document.getElementById("grid").innerHTML = list.length
+            ? list.map(card).join("")
+            : `<div class="col-span-full bg-white border border-gray-100 rounded-2xl py-16 text-center">
+                   <i class="ph ph-package text-4xl text-brand mb-3"></i>
+                   <p class="font-semibold text-gray-900">No templates found for this selection.</p>
+                   <p class="text-sm text-gray-500">Try choosing a different tab or searching for another term.</p>
+               </div>`;
+    }
+
+    // --- Tab Switching Logic ---
+    const tabContainer = document.getElementById("filter-tabs");
+    if (tabContainer) {
+        tabContainer.querySelectorAll(".tab-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                // Update active tab key
+                activeTab = btn.getAttribute("data-tab");
+
+                // Toggle active Tailwind classes
+                tabContainer.querySelectorAll(".tab-btn").forEach(b => {
+                    b.className = "tab-btn text-gray-600 hover:text-gray-900 text-[13px] font-medium px-4 py-1.5 rounded-md transition-all";
+                });
+                btn.className = "tab-btn bg-brand text-white text-[13px] font-semibold px-4 py-1.5 rounded-md shadow-sm transition-all";
+
+                render();
+            });
+        });
+    }
+
+  // --- Category Filter Helper ---
+  window.filterByCategory = function(category) {
+    activeCategory = category;
+    renderCategories(); // Updates the visual active state of the pills
+    render();           // Re-renders the template grid based on the new filter
+};
+function renderCategories() {
+    const categories = typeof Store !== 'undefined' && Store.categories ? Store.categories() : [];
+    const activeCats = categories.filter(c => c.active !== false);
+
+    // Render Top Category Cards (Max 5 + "See all" button)
+    const cardsContainer = document.getElementById("category-cards");
+    if (cardsContainer) {
+        if (activeCats.length > 0) {
+            cardsContainer.innerHTML = activeCats.slice(0, 5).map(c => `
+                <a href="#" onclick="filterByCategory('${escapeHTML(c.name)}'); return false;" class="flex items-center gap-4 bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow">
+                    <i class="ph-bold ${escapeHTML(c.icon || 'ph-folder')} text-2xl text-brand"></i>
+                    <div>
+                        <div class="font-semibold text-gray-900 text-sm">${escapeHTML(c.name)}</div>
+                        <div class="text-xs text-gray-500">View</div>
+                    </div>
+                </a>
+            `).join("") + `
+                <a href="#" onclick="filterByCategory('all'); return false;" class="flex items-center gap-4 bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow">
+                    <div class="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-brand">
+                        <i class="ph ph-dots-three text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-gray-900 text-sm">More</div>
+                        <div class="text-xs text-gray-500">See all</div>
+                    </div>
+                </a>
+            `;
+        } else {
+            cardsContainer.innerHTML = ''; 
+        }
+    }
+
+    // Render Filter Pills above the Template Grid
+    const filterContainer = document.getElementById("category-filters");
+    if (filterContainer) {
+        let pillsHtml = `<button data-cat="all" onclick="filterByCategory('all')" class="category-btn px-4 py-2 rounded-full text-[13px] ${activeCategory === 'all' ? 'font-semibold bg-brand text-white border-brand' : 'font-medium bg-white text-gray-600 border-gray-200 hover:border-brand/50 hover:text-brand'} shadow-sm transition-all whitespace-nowrap border">All Templates</button>`;
+
+        activeCats.forEach(c => {
+            const isActive = activeCategory.toLowerCase() === c.name.toLowerCase();
+            const activeClass = isActive
+                ? "font-semibold bg-brand text-white border-brand"
+                : "font-medium bg-white text-gray-600 border-gray-200 hover:border-brand/50 hover:text-brand";
+
+            pillsHtml += `<button data-cat="${escapeHTML(c.name.toLowerCase())}" onclick="filterByCategory('${escapeHTML(c.name)}')" class="category-btn px-4 py-2 rounded-full text-[13px] ${activeClass} shadow-sm transition-all whitespace-nowrap border">${escapeHTML(c.name)}</button>`;
+        });
+        filterContainer.innerHTML = pillsHtml;
+    }
+}
+    // --- Detail View Controls ---
+    window.changeDetailImg = function(dir) {
+        if (!window.currentGallery || window.currentGallery.length <= 1) return;
+        window.currentImgIndex = (window.currentImgIndex + dir + window.currentGallery.length) % window.currentGallery.length;
+        document.getElementById('mainDetailImg').src = window.currentGallery[window.currentImgIndex];
+    };
+
+    window.setDetailImg = function(index) {
+        if (!window.currentGallery || !window.currentGallery[index]) return;
+        window.currentImgIndex = index;
+        document.getElementById('mainDetailImg').src = window.currentGallery[window.currentImgIndex];
+    };
+
+    window.showDetail = function(id) {
+        const list = (typeof Store !== 'undefined' && Store.published ? Store.published() : []);
+        const t = list.find(x => String(x.id) === String(id)) || {
+            title: 'SAAS', category: 'Web Templates', price: 12, badge: 'NEW', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800'
+        };
+
+        window.currentPreviewTemplate = t;
+        window.currentGallery = [t.image, ...(t.gallery || [])].filter(Boolean);
+        window.currentImgIndex = 0;
+
+        document.getElementById('home-hero').classList.add('hidden');
+        document.getElementById('home-main').classList.add('hidden');
+        document.getElementById('detail-view').classList.remove('hidden');
+
+        const contentHtml = `
+            <div class="grid lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-gray-100 rounded-2xl overflow-hidden relative border border-gray-100">
+                        ${t.badge ? `<span class="absolute top-4 left-4 bg-brand text-white text-xs font-bold px-2 py-1 rounded tracking-wide uppercase z-10">${escapeHTML(t.badge)}</span>` : ''}
+                        <button onclick="changeDetailImg(-1)" class="absolute top-1/2 left-4 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md z-10 transition-colors"><i class="ph-bold ph-caret-left text-gray-700"></i></button>
+                        <button onclick="changeDetailImg(1)" class="absolute top-1/2 right-4 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-md z-10 transition-colors"><i class="ph-bold ph-caret-right text-gray-700"></i></button>
+                        <img id="mainDetailImg" src="${escapeHTML(t.image)}" class="w-full aspect-[16/9] object-cover transition-opacity duration-300">
+                    </div>
+                    
+                    <div class="grid grid-cols-4 gap-4">
+                        ${ window.currentGallery.slice(0, 4).map((img, i) => `
+                        <div onclick="setDetailImg(${i})" class="aspect-[4/3] rounded-lg overflow-hidden bg-gray-100 cursor-pointer border border-transparent hover:border-brand/30">
+                            <img src="${escapeHTML(img)}" class="w-full h-full object-cover opacity-70 hover:opacity-100 transition-opacity">
+                        </div>`).join('') }
+                    </div>
+
+                    <div class="pt-2">
+                        <div class="flex items-center gap-4 mb-2">
+                            <h1 class="text-3xl font-bold text-gray-900">${escapeHTML(t.title)}</h1>
+                            <span class="bg-[#f0fdf4] text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-green-200">
+                                <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div> Published
+                            </span>
+                        </div>
+                        <p class="text-gray-500 text-sm mb-5 max-w-2xl leading-relaxed">
+                            Modern and responsive ${escapeHTML(t.title)} dashboard built with HTML, CSS and JavaScript. Easy to customize.
+                        </p>
+                        <div class="flex items-center gap-6 mb-6 text-[15px] text-gray-600">
+                            <div class="flex items-center gap-1.5">
+                                <div class="flex text-yellow-400 text-base"><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star-half"></i></div>
+                                <span class="font-semibold text-gray-900 ml-1">4.8</span> (120 reviews)
+                            </div>
+                            <div class="flex items-center gap-2 text-brand font-medium"><i class="ph ph-download-simple text-lg"></i> 1,204 downloads</div>
+                        </div>
+
+                        <div class="mb-6">
+                            <div class="text-[32px] font-bold text-gray-900 leading-none mb-2">Free</div>
+                            <p class="text-sm text-gray-500">Join our developer newsletter to unlock the complete source code instantly.</p>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-4 mb-8 items-start">
+                            <div class="flex flex-col gap-3">
+                                <div class="flex items-center bg-white border border-gray-200 rounded-xl p-1.5 focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/20 transition-all sm:w-[320px] shadow-sm">
+                                    <input type="email" placeholder="Enter your email address" class="w-full bg-transparent pl-3 pr-2 py-2 text-[14px] text-gray-900 placeholder-gray-400 focus:outline-none">
+                             <button class="bg-brand hover:bg-brand/90 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-[14px] whitespace-nowrap" onclick="downloadTemplate('${t.id}')">Get Source</button>
+                                </div>
+                                <label class="flex items-start gap-2.5 cursor-pointer group px-1">
+                                    <div class="relative flex items-center pt-0.5 shrink-0">
+                                        <input type="checkbox" name="needs_customization" class="peer sr-only">
+                                        <div class="w-4 h-4 rounded border border-gray-300 bg-white peer-checked:bg-brand peer-checked:border-brand transition-colors"></div>
+                                        <i class="ph-bold ph-check absolute inset-0 text-white text-[10px] m-auto opacity-0 peer-checked:opacity-100 flex items-center justify-center"></i>
+                                    </div>
+                                    <span class="text-[13px] text-gray-600 group-hover:text-gray-900 transition-colors select-none leading-snug max-w-[290px]">
+                                        I need help customizing this template. <span class="text-brand font-medium">Hire our agency to build it.</span>
+                                    </span>
+                                </label>
+                            </div>
+
+                       <a href="preview.html?id=${t.id}" target="_blank" class="bg-white hover:bg-gray-50 text-brand font-semibold px-6 rounded-xl border border-gray-200 shadow-sm transition-colors flex items-center justify-center gap-2 text-[14px] h-[52px]">
+    Live Preview <i class="ph-bold ph-arrow-square-out"></i>
+</a><button class="bg-white hover:bg-gray-50 text-brand font-semibold px-6 rounded-xl border border-gray-200 shadow-sm transition-colors flex items-center justify-center gap-2 text-[14px] h-[52px]" onclick="shareTemplate('${t.id}')">
+    Share <i class="ph-bold ph-share-network"></i>
+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)]">
+                        <h3 class="font-semibold text-gray-900 mb-5">Template Information</h3>
+                        <div class="space-y-3.5 text-sm">
+                            <div class="flex justify-between py-1 border-b border-gray-50"><span class="text-gray-500">Category</span><span class="font-medium text-gray-900">${escapeHTML(t.category || 'Web Templates')}</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-50"><span class="text-gray-500">Last Updated</span><span class="font-medium text-gray-900">Sep 6, 2026</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-50"><span class="text-gray-500">File Type</span><span class="font-medium text-gray-900">ZIP (HTML, CSS, JS)</span></div>
+                            <div class="flex justify-between py-1 border-b border-gray-50"><span class="text-gray-500">File Size</span><span class="font-medium text-gray-900">5.2 MB</span></div>
+                            <div class="flex justify-between py-1"><span class="text-gray-500">License</span><span class="font-medium text-gray-900 flex items-center gap-1 cursor-pointer hover:text-brand">Regular License <i class="ph-fill ph-info text-gray-400"></i></span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById('detail-content').innerHTML = contentHtml;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.showHome = function(e) {
+        if(e) e.preventDefault();
+        document.getElementById('detail-view').classList.add('hidden');
+        document.getElementById('home-hero').classList.remove('hidden');
+        document.getElementById('home-main').classList.remove('hidden');
+    };
+
+    document.getElementById("search").addEventListener("input", e => { query = e.target.value.trim(); render(); });
+  document.addEventListener("cm:changed", () => {
+    renderCategories();
+    render();
+});
+   document.addEventListener("cm:ready", () => {
+    renderCategories();
+    render();
+});
+
+// Initial render
+renderCategories();
+render();
+})();
+</script>
+
+    <!-- Viewport size options for the preview window (add-on, nothing above is modified) -->
+    <script>
+    (function () {
+        const VIEWPORTS = [
+            { id: "fit",     label: "Fit",     icon: "ph-frame-corners" },
+            { id: "desktop", label: "Desktop", icon: "ph-desktop", w: 1440, h: 900 },
+            { id: "laptop",  label: "Laptop",  icon: "ph-laptop",  w: 1280, h: 800 },
+            { id: "tablet",  label: "Tablet",  icon: "ph-device-tablet", w: 768, h: 1024 },
+            { id: "mobile",  label: "Mobile",  icon: "ph-device-mobile", w: 390, h: 844 }
+        ];
+        let current = "fit";
+
+        function apply(panel) {
+            const vp = VIEWPORTS.find(v => v.id === current) || VIEWPORTS[0];
+            panel.style.transition = "width .2s ease, height .2s ease";
+            if (!vp.w) {
+                panel.style.width = "min(1200px,100%)";
+                panel.style.height = "min(90vh,900px)";
+                panel.style.transform = "none";
+                return;
+            }
+            panel.style.width = vp.w + "px";
+            panel.style.height = vp.h + "px";
+            panel.style.maxWidth = "none";
+            const scale = Math.min(1,
+                (window.innerWidth - 48) / vp.w,
+                (window.innerHeight - 48) / vp.h);
+            panel.style.transform = scale < 1 ? "scale(" + scale + ")" : "none";
+            panel.style.transformOrigin = "center center";
+        }
+
+        function bar(panel) {
+            const header = panel.firstElementChild;
+            if (!header || header.querySelector("[data-vp]")) return;
+            const vpNow = VIEWPORTS.find(v => v.id === current) || VIEWPORTS[0];
+            const compact = !!vpNow.w && vpNow.w < 900;
+            header.style.flexWrap = "wrap";
+            const box = document.createElement("div");
+            box.style.cssText = "display:flex;gap:4px;background:#f3f4f6;padding:4px;border-radius:11px";
+            box.innerHTML = VIEWPORTS.map(v => `
+                <button data-vp="${v.id}" title="${v.label}${v.w ? " · " + v.w + "×" + v.h : ""}"
+                    style="${current === v.id
+                        ? "background:#fff;color:#111827;box-shadow:0 1px 3px rgba(0,0,0,.1)"
+                        : "background:transparent;color:#6b7280"};border:0;padding:6px ${compact ? "8" : "10"}px;border-radius:8px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px">
+                    <i class="ph ${v.icon}"></i>${compact ? "" : `<span>${v.label}</span>`}
+                </button>`).join("");
+            header.insertBefore(box, header.children[1] || null);
+            box.querySelectorAll("[data-vp]").forEach(b =>
+                b.addEventListener("click", () => {
+                    current = b.dataset.vp;
+                    box.remove();
+                    bar(panel);
+                    apply(panel);
+                }));
+            apply(panel);
+        }
+
+        function scan() {
+            const wrap = document.getElementById("cm-preview");
+            if (!wrap) return;
+            const panel = wrap.firstElementChild;
+            if (panel) bar(panel);
+        }
+
+        new MutationObserver(scan).observe(document.body, { childList: true, subtree: true });
+        window.addEventListener("resize", scan);
+        window.downloadTemplate = function(id, event) {
+    if(event) event.stopPropagation();
+    
+    // Retrieve template data
+    const list = typeof Store !== 'undefined' && Store.published ? Store.published() : [];
+    const t = list.find(x => String(x.id) === String(id)) || { title: 'Template' };
+    
+    // Create an automated download prompt for the user
+    const a = document.createElement('a');
+    a.href = t.fileUrl || 'data:text/plain;charset=utf-8,' + encodeURIComponent('Source code payload for ' + t.title);
+    a.download = t.title.toLowerCase().replace(/\s+/g, '-') + '.zip';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+};
+
+window.shareTemplate = function(id, event) {
+    if(event) event.stopPropagation();
+    
+    // Construct the direct link using the preview parameter
+    const url = new URL(window.location.href);
+    url.searchParams.set('preview', id);
+    
+    // Copy the link to clipboard for social sharing
+    navigator.clipboard.writeText(url.toString()).then(() => {
+        alert('Shareable preview link copied: ' + url.toString());
+    }).catch(err => {
+        console.error('Failed to copy link', err);
+    });
+};
+// Parse URL for ?preview=[id] parameters upon loading
+const urlParams = new URLSearchParams(window.location.search);
+const previewId = urlParams.get('preview');
+
+if (previewId) {
+    // 1. Mount the underlying detail view
+    showDetail(previewId);
+    
+    // 2. Automatically launch the live preview interface if the Store is active
+    if (typeof Store !== 'undefined' && Store.openPreview) {
+        const list = Store.published ? Store.published() : [];
+        const targetTemplate = list.find(x => String(x.id) === String(previewId)) || window.currentPreviewTemplate;
+        if (targetTemplate) {
+            Store.openPreview(targetTemplate);
+        }
+    }
+}
+    })();
+    </script>
+</body>
+</html>
