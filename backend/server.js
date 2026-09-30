@@ -4,10 +4,12 @@ const fs = require('fs');
 const path = require('path');
 const net = require('net');
 const bodyParser = require('body-parser');
+const MongoDataStore = require('./mongo-data-store');
 
 const app = express();
 const DB_FILE = process.env.DB_FILE || path.join(__dirname, 'db.json');
 const FRONTEND_DIR = path.join(__dirname, '..', 'frontend');
+const STORAGE_DRIVER = process.env.STORAGE_DRIVER || (process.env.MONGODB_URI ? 'mongodb' : 'file');
 const allowedOrigins = (process.env.FRONTEND_ORIGINS || process.env.FRONTEND_ORIGIN || '')
     .split(',')
     .map((origin) => origin.trim())
@@ -51,6 +53,14 @@ function readDB() {
 
 // GET all data
 app.get('/api/data', (req, res) => {
+    if (mongoStore) {
+        return mongoStore.sendAll(res).catch((error) => {
+            console.error('GET /api/data failed:', error);
+            if (res.headersSent) return res.destroy(error);
+            res.status(500).json({ error: 'Failed to read data store' });
+        });
+    }
+
     try {
         res.json(readDB());
     } catch (error) {
@@ -61,6 +71,15 @@ app.get('/api/data', (req, res) => {
 
 // POST to update a specific key (templates, categories, sales, etc.)
 app.post('/api/data/:key', (req, res) => {
+    if (mongoStore) {
+        return mongoStore.write(req.params.key, req.body)
+            .then(() => res.json({ success: true }))
+            .catch((error) => {
+                console.error('POST /api/data/:key failed:', error);
+                res.status(500).json({ error: 'Failed to save data store' });
+            });
+    }
+
     try {
         const key = req.params.key;
         const data = req.body;
@@ -81,6 +100,7 @@ app.use((err, req, res, next) => {
 });
 
 const platformPort = process.env.PORT ? Number(process.env.PORT) : null;
+let mongoStore = null;
 
 function startServer(port) {
     const server = app.listen(port, () => {
@@ -98,4 +118,26 @@ function startServer(port) {
     });
 }
 
-startServer(platformPort || 3000);
+async function start() {
+    if (STORAGE_DRIVER === 'mongodb') {
+        if (!process.env.MONGODB_URI) {
+            throw new Error('MONGODB_URI is required when STORAGE_DRIVER=mongodb');
+        }
+
+        mongoStore = new MongoDataStore(
+            process.env.MONGODB_URI,
+            process.env.MONGODB_DATABASE || 'codemarket'
+        );
+        await mongoStore.connect();
+        console.log(`Connected to MongoDB database ${process.env.MONGODB_DATABASE || 'codemarket'}`);
+    } else if (STORAGE_DRIVER !== 'file') {
+        throw new Error(`Unsupported STORAGE_DRIVER: ${STORAGE_DRIVER}`);
+    }
+
+    startServer(platformPort || 3000);
+}
+
+start().catch((error) => {
+    console.error('Failed to initialize data store:', error);
+    process.exitCode = 1;
+});
