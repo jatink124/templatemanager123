@@ -1,5 +1,11 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const dns = require('node:dns');
+
+if (process.env.MONGODB_DNS_SERVERS) {
+    dns.setServers(process.env.MONGODB_DNS_SERVERS.split(',').map((server) => server.trim()));
+}
+
 const MongoDataStore = require('./mongo-data-store');
 
 async function main() {

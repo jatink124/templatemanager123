@@ -10,7 +10,7 @@ const app = express();
 const DB_FILE = process.env.DB_FILE || path.join(__dirname, 'db.json');
 const FRONTEND_DIR = path.join(__dirname, '..', 'frontend');
 const STORAGE_DRIVER = process.env.STORAGE_DRIVER || (process.env.MONGODB_URI ? 'mongodb' : 'file');
-const allowedOrigins = (process.env.FRONTEND_ORIGINS || process.env.FRONTEND_ORIGIN || '')
+const allowedOrigins = (process.env.FRONTEND_ORIGINS || process.env.FRONTEND_ORIGIN || 'https://templatemanager.netlify.app')
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
