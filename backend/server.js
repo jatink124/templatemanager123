@@ -10,14 +10,17 @@ const app = express();
 const DB_FILE = process.env.DB_FILE || path.join(__dirname, 'db.json');
 const FRONTEND_DIR = path.join(__dirname, '..', 'frontend');
 const STORAGE_DRIVER = process.env.STORAGE_DRIVER || (process.env.MONGODB_URI ? 'mongodb' : 'file');
-const allowedOrigins = (process.env.FRONTEND_ORIGINS || process.env.FRONTEND_ORIGIN || 'https://templatemanager.netlify.app')
+const allowedOrigins = new Set([
+    'https://templatemanager.netlify.app',
+    ...(process.env.FRONTEND_ORIGINS || process.env.FRONTEND_ORIGIN || '')
     .split(',')
     .map((origin) => origin.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+].map((origin) => origin.replace(/\/$/, '')));
 
 app.use(cors({
     origin(origin, callback) {
-        callback(null, !origin || allowedOrigins.includes(origin));
+        callback(null, !origin || allowedOrigins.has(origin));
     }
 }));
 app.use(express.static(FRONTEND_DIR));
