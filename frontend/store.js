@@ -505,7 +505,10 @@
 
   // Fetch data from Node.js before starting the app
   fetch(`${API_URL}/data`)
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) throw new Error(`Data API returned ${res.status}`);
+      return res.json();
+    })
     .then(data => {
         memoryDB = data;
         // If the DB is completely empty, run the seeder
@@ -516,8 +519,7 @@
         document.dispatchEvent(new CustomEvent("cm:ready"));
     })
     .catch(err => {
-        console.error("Backend unreachable. Falling back to empty state.", err);
-        Store.seed();
+        console.error("Could not load saved data from the backend.", err);
         document.dispatchEvent(new CustomEvent("cm:ready"));
     });
 

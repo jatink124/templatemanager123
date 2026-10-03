@@ -58,16 +58,70 @@ async function readAll(bucket) {
 
   const data = {};
   for (const [key, file] of latestByKey) {
-    const chunks = [];
-    for await (const chunk of bucket.openDownloadStream(file._id)) {
-      chunks.push(chunk);
-    }
-    data[key] = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    data[key] = await readFile(bucket, file);
   }
   return data;
 }
 
+async function readFile(bucket, file) {
+  const chunks = [];
+  for await (const chunk of bucket.openDownloadStream(file._id)) {
+    chunks.push(chunk);
+  }
+  return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+}
+
+async function readLatestFile(bucket, filename) {
+  const files = await bucket.find({ filename }).sort({ uploadDate: -1 }).toArray();
+  if (!files.length) return null;
+  return readFile(bucket, files[0]);
+}
+
+function summarizeData(data) {
+  if (!Array.isArray(data.cm_templates)) return data;
+
+  return {
+    ...data,
+    cm_templates: data.cm_templates.map((template) => {
+      const summary = { ...template };
+      delete summary.appData;
+
+      if (typeof summary.image === 'string' && summary.image.startsWith('data:')) {
+        delete summary.image;
+      }
+
+      return summary;
+    })
+  };
+}
+
+async function mergeTemplateAssets(bucket, incomingTemplates) {
+  if (!Array.isArray(incomingTemplates)) return incomingTemplates;
+
+  const existingTemplates = await readLatestFile(bucket, 'cm_templates');
+  if (!Array.isArray(existingTemplates)) return incomingTemplates;
+
+  const existingById = new Map(existingTemplates.map((template) => [String(template.id), template]));
+  return incomingTemplates.map((template) => {
+    const existing = existingById.get(String(template.id));
+    if (!existing) return template;
+
+    const merged = { ...existing, ...template };
+    if (template.image === undefined || template.image === null) {
+      merged.image = existing.image;
+    }
+    if (template.appData === undefined) {
+      merged.appData = existing.appData;
+    }
+    return merged;
+  });
+}
+
 async function writeValue(bucket, key, value) {
+  if (key === 'cm_templates') {
+    value = await mergeTemplateAssets(bucket, value);
+  }
+
   const upload = bucket.openUploadStream(key);
   const completed = new Promise((resolve, reject) => {
     upload.once('finish', resolve);
@@ -94,7 +148,7 @@ exports.handler = async (event) => {
 
   if (event.httpMethod === 'GET' && routePath === '/data') {
     try {
-      return jsonResponse(200, await readAll(await getBucket()));
+      return jsonResponse(200, summarizeData(await readAll(await getBucket())));
     } catch (error) {
       console.error('GET /api/data failed:', error);
       return jsonResponse(500, { error: 'Failed to read data store' });
