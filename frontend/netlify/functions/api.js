@@ -82,16 +82,23 @@ function summarizeData(data) {
 
   return {
     ...data,
-    cm_templates: data.cm_templates.map((template) => {
-      const summary = { ...template };
-      delete summary.appData;
-
-      if (typeof summary.image === 'string' && summary.image.startsWith('data:')) {
-        delete summary.image;
-      }
-
-      return summary;
-    })
+    cm_templates: data.cm_templates.map((template) => ({
+      id: template.id,
+      title: typeof template.title === 'string' ? template.title.slice(0, 200) : '',
+      description: typeof template.description === 'string' ? template.description.slice(0, 2000) : '',
+      category: typeof template.category === 'string' ? template.category.slice(0, 200) : 'Others',
+      price: Number.isFinite(Number(template.price)) ? Number(template.price) : 0,
+      status: typeof template.status === 'string' ? template.status.slice(0, 40) : 'Draft',
+      badge: typeof template.badge === 'string' ? template.badge.slice(0, 40) : '',
+      image: typeof template.image === 'string' && !template.image.startsWith('data:')
+        ? template.image.slice(0, 2000)
+        : undefined,
+      demoUrl: typeof template.demoUrl === 'string' ? template.demoUrl.slice(0, 2000) : '',
+      fileName: typeof template.fileName === 'string' ? template.fileName.slice(0, 255) : '',
+      createdAt: template.createdAt,
+      views: Number(template.views) || 0,
+      sales: Number(template.sales) || 0
+    }))
   };
 }
 
