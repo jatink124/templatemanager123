@@ -4,5 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./backend/server.js"
+  },
+  "dependencies": {
+    "mongodb": "^7.7.0"
   }
 }
