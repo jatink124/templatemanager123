@@ -318,7 +318,7 @@
       const esc = Store.escape;
       
       // Select best preview mode based on available data
-      let mode = t.appData ? "app" : (t.demoUrl ? "live" : "shots");
+      let mode = (t.hasAppData || t.appData) ? "app" : (t.demoUrl ? "live" : "shots");
       let shot = 0;
 
       Store.closePreview();
@@ -328,8 +328,9 @@
         "position:fixed;inset:0;z-index:10000;background:rgba(15,12,35,.72);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px";
 
       function stage() {
-        if (mode === "app" && t.appData) {
-            return `<iframe id="cm-app-frame" title="Interactive preview of ${esc(t.title)}" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox" style="width:100%;height:100%;border:0;background:#fff;display:block"></iframe>`;
+        if (mode === "app" && (t.hasAppData || t.appData)) {
+            const appUrl = `${API_URL}/assets/${encodeURIComponent(String(t.id))}/app/${encodeURIComponent(t.appEntry || "index.html")}`;
+            return `<iframe src="${esc(appUrl)}" title="Interactive preview of ${esc(t.title)}" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox" style="width:100%;height:100%;border:0;background:#fff;display:block"></iframe>`;
         }
         if (mode === "live" && t.demoUrl) {
           return `<iframe src="${esc(t.demoUrl)}" title="Live preview of ${esc(t.title)}" style="width:100%;height:100%;border:0;background:#fff"></iframe>`;
@@ -349,7 +350,7 @@
               </div>
               
               <div style="display:flex;gap:8px;background:#f3f4f6;padding:4px;border-radius:11px">
-                  ${t.appData ? `<button data-mode="app" style="${mode === "app" ? "background:#fff;color:#111827;box-shadow:0 1px 3px rgba(0,0,0,.1)" : "background:transparent;color:#6b7280"};border:0;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">Interactive App</button>` : ""}
+                  ${(t.hasAppData || t.appData) ? `<button data-mode="app" style="${mode === "app" ? "background:#fff;color:#111827;box-shadow:0 1px 3px rgba(0,0,0,.1)" : "background:transparent;color:#6b7280"};border:0;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">Interactive App</button>` : ""}
                   ${t.demoUrl ? `<button data-mode="live" style="${mode === "live" ? "background:#fff;color:#111827;box-shadow:0 1px 3px rgba(0,0,0,.1)" : "background:transparent;color:#6b7280"};border:0;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">Live demo</button>` : ""}
                   <button data-mode="shots" style="${mode === "shots" ? "background:#fff;color:#111827;box-shadow:0 1px 3px rgba(0,0,0,.1)" : "background:transparent;color:#6b7280"};border:0;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">Screens (${shots.length})</button>
               </div>
@@ -379,22 +380,6 @@
         );
         wrap.querySelector("[data-close]").addEventListener("click", Store.closePreview);
 
-        // Interactive App player: run the uploaded ZIP like a local server
-        if (mode === "app" && t.appData) {
-            const frame = wrap.querySelector("#cm-app-frame");
-            const htmlViews = Object.keys(t.appData).filter((k) => /\.html?$/i.test(k));
-            const entry = t.appData["index.html"] ? "index.html" : htmlViews[0];
-            if (entry) {
-                Store._navHandler = (e) => {
-                    const target = e.data && e.data.cmNav;
-                    if (target && t.appData[target] != null) {
-                        frame.srcdoc = Store.buildAppDocument(t.appData, target);
-                    }
-                };
-                window.addEventListener("message", Store._navHandler);
-                frame.srcdoc = Store.buildAppDocument(t.appData, entry);
-            }
-        }
       }
 
       wrap.addEventListener("click", (e) => {

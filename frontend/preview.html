@@ -77,18 +77,9 @@
                 });
 
                 // Scenario A: The template has a ZIP file uploaded
-                if (t.appData && Object.keys(t.appData).length > 0) {
-                    const htmlViews = Object.keys(t.appData).filter((k) => /\.html?$/i.test(k));
-                    const entry = t.appData["index.html"] ? "index.html" : htmlViews[0];
-                    if (entry) {
-                        window.addEventListener("message", (e) => {
-                            const target = e.data && e.data.cmNav;
-                            if (target && t.appData[target] != null) {
-                                frame.srcdoc = Store.buildAppDocument(t.appData, target);
-                            }
-                        });
-                        frame.srcdoc = Store.buildAppDocument(t.appData, entry);
-                    }
+                if (t.hasAppData || (t.appData && Object.keys(t.appData).length > 0)) {
+                    const entry = t.appEntry || "index.html";
+                    frame.src = `${window.CODEMARKET_API_URL}/assets/${encodeURIComponent(String(t.id))}/app/${encodeURIComponent(entry)}`;
                 } 
                 // Scenario B: The template has a Live Demo URL
                 else if (t.demoUrl && t.demoUrl.trim() !== '') {

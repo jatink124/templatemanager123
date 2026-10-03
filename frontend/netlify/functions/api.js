@@ -54,7 +54,11 @@ function parseRequestBody(event) {
 async function readAll(bucket) {
   const files = await bucket.find().sort({ uploadDate: 1 }).toArray();
   const latestByKey = new Map();
-  for (const file of files) latestByKey.set(file.filename, file);
+  for (const file of files) {
+    if (!file.filename.startsWith('template-assets/')) {
+      latestByKey.set(file.filename, file);
+    }
+  }
 
   const data = {};
   for (const [key, file] of latestByKey) {
@@ -90,11 +94,16 @@ function summarizeData(data) {
       price: Number.isFinite(Number(template.price)) ? Number(template.price) : 0,
       status: typeof template.status === 'string' ? template.status.slice(0, 40) : 'Draft',
       badge: typeof template.badge === 'string' ? template.badge.slice(0, 40) : '',
-      image: typeof template.image === 'string' && !template.image.startsWith('data:')
+      image: typeof template.image === 'string'
         ? template.image.slice(0, 2000)
         : undefined,
+      gallery: Array.isArray(template.gallery)
+        ? template.gallery.filter((item) => typeof item === 'string').slice(0, 12)
+        : [],
       demoUrl: typeof template.demoUrl === 'string' ? template.demoUrl.slice(0, 2000) : '',
       fileName: typeof template.fileName === 'string' ? template.fileName.slice(0, 255) : '',
+      hasAppData: template.hasAppData === true,
+      appEntry: typeof template.appEntry === 'string' ? template.appEntry.slice(0, 255) : '',
       createdAt: template.createdAt,
       views: Number(template.views) || 0,
       sales: Number(template.sales) || 0
@@ -159,6 +168,46 @@ exports.handler = async (event) => {
     } catch (error) {
       console.error('GET /api/data failed:', error);
       return jsonResponse(500, { error: 'Failed to read data store' });
+    }
+  }
+
+  const assetMatch = routePath.match(/^\/assets\/([^/]+)\/(image|gallery\/\d+|app\/.+)$/);
+  if (event.httpMethod === 'GET' && assetMatch) {
+    try {
+      const templateId = assetMatch[1];
+      const assetPath = assetMatch[2];
+      if (assetPath.split('/').includes('..')) {
+        return jsonResponse(400, { error: 'Invalid asset path' });
+      }
+
+      const filename = `template-assets/${encodeURIComponent(templateId)}/${assetPath === 'image'
+        ? 'image'
+        : assetPath.startsWith('gallery/')
+          ? assetPath
+          : `app/${encodeURIComponent(assetPath.slice('app/'.length))}`}`;
+      const bucket = await getBucket();
+      const files = await bucket.find({ filename }).sort({ uploadDate: -1 }).toArray();
+      if (!files.length) {
+        return jsonResponse(404, { error: 'Template asset not found' });
+      }
+
+      const chunks = [];
+      for await (const chunk of bucket.openDownloadStream(files[0]._id)) {
+        chunks.push(chunk);
+      }
+
+      return {
+        statusCode: 200,
+        headers: {
+          'Content-Type': files[0].metadata?.contentType || 'application/octet-stream',
+          'Cache-Control': 'public, max-age=3600'
+        },
+        isBase64Encoded: true,
+        body: Buffer.concat(chunks).toString('base64')
+      };
+    } catch (error) {
+      console.error('GET /api/assets/:id/* failed:', error);
+      return jsonResponse(500, { error: 'Failed to read template asset' });
     }
   }
 
