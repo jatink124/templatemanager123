@@ -311,8 +311,7 @@
     ];
 
   function getAllTemplates() {
-        let list = typeof Store !== 'undefined' && Store.published ? [...Store.published()] : [];
-        return list.filter(t => !['t1', 't2'].includes(t.id));
+        return typeof Store !== 'undefined' && Store.published ? [...Store.published()] : [];
     }
 
     function visible() {
@@ -515,14 +514,13 @@ function render() {
 function renderCategories() {
         const allTemplates = getAllTemplates();
         
-        // 1. Fetch ONLY the real templates from your db.json
+        // Build categories from the published templates returned by the data store.
         let dbList = typeof Store !== 'undefined' && Store.published ? [...Store.published()] : [];
-        const realTemplates = dbList.filter(t => !['t1', 't2'].includes(t.id));
 
         const categoryMap = {};
         
-        // 2. Build sidebar categories based ONLY on what is in db.json
-        realTemplates.forEach(t => {
+        // Build sidebar categories from the published templates.
+        dbList.forEach(t => {
             const catName = t.category || "Others";
             if (!categoryMap[catName]) {
                 categoryMap[catName] = { name: catName, icon: "ph-folder" };
