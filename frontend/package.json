@@ -1,0 +1,8 @@
+{
+  "name": "codemarket-netlify",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "mongodb": "^7.7.0"
+  }
+}
