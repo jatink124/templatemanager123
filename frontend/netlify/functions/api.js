@@ -51,6 +51,48 @@ function parseRequestBody(event) {
   return JSON.parse(body);
 }
 
+function parseDataUri(value) {
+  const match = typeof value === 'string'
+    ? value.match(/^data:([^;,]+);base64,([\s\S]*)$/)
+    : null;
+  return match
+    ? { contentType: match[1], contents: Buffer.from(match[2], 'base64') }
+    : null;
+}
+
+function contentTypeFor(fileName) {
+  const extension = fileName.split('.').pop().toLowerCase();
+  return ({
+    css: 'text/css; charset=utf-8',
+    html: 'text/html; charset=utf-8',
+    htm: 'text/html; charset=utf-8',
+    js: 'text/javascript; charset=utf-8',
+    json: 'application/json; charset=utf-8',
+    svg: 'image/svg+xml',
+    txt: 'text/plain; charset=utf-8',
+    xml: 'application/xml; charset=utf-8'
+  })[extension] || 'application/octet-stream';
+}
+
+async function writeAsset(bucket, filename, contents, contentType) {
+  const upload = bucket.openUploadStream(filename, {
+    metadata: { contentType }
+  });
+  const completed = new Promise((resolve, reject) => {
+    upload.once('finish', resolve);
+    upload.once('error', reject);
+  });
+
+  upload.end(contents);
+  await completed;
+
+  const previousFiles = await bucket.find({
+    filename,
+    _id: { $ne: upload.id }
+  }).toArray();
+  await Promise.all(previousFiles.map((file) => bucket.delete(file._id)));
+}
+
 async function readAll(bucket) {
   const files = await bucket.find().sort({ uploadDate: 1 }).toArray();
   const latestByKey = new Map();
@@ -94,9 +136,7 @@ function summarizeData(data) {
       price: Number.isFinite(Number(template.price)) ? Number(template.price) : 0,
       status: typeof template.status === 'string' ? template.status.slice(0, 40) : 'Draft',
       badge: typeof template.badge === 'string' ? template.badge.slice(0, 40) : '',
-      image: typeof template.image === 'string'
-        ? template.image.slice(0, 2000)
-        : undefined,
+      image: typeof template.image === 'string' ? template.image : undefined,
       gallery: Array.isArray(template.gallery)
         ? template.gallery.filter((item) => typeof item === 'string').slice(0, 12)
         : [],
@@ -133,9 +173,81 @@ async function mergeTemplateAssets(bucket, incomingTemplates) {
   });
 }
 
+async function storeTemplateAssets(bucket, templates) {
+  if (!Array.isArray(templates)) return templates;
+
+  const storedTemplates = [];
+  for (const template of templates) {
+    const id = String(template.id);
+    const assetPrefix = `template-assets/${encodeURIComponent(id)}`;
+    const summary = { ...template };
+
+    const image = parseDataUri(template.image);
+    if (image) {
+      await writeAsset(bucket, `${assetPrefix}/image`, image.contents, image.contentType);
+      summary.image = `/api/assets/${encodeURIComponent(id)}/image`;
+    }
+
+    if (Array.isArray(template.gallery)) {
+      summary.gallery = [];
+      for (let index = 0; index < template.gallery.length; index += 1) {
+        const galleryImage = parseDataUri(template.gallery[index]);
+        if (!galleryImage) {
+          if (typeof template.gallery[index] === 'string') {
+            summary.gallery.push(template.gallery[index]);
+          }
+          continue;
+        }
+
+        await writeAsset(
+          bucket,
+          `${assetPrefix}/gallery/${index}`,
+          galleryImage.contents,
+          galleryImage.contentType
+        );
+        summary.gallery.push(`/api/assets/${encodeURIComponent(id)}/gallery/${index}`);
+      }
+    }
+
+    const appData = template.appData;
+    const appFiles = appData && typeof appData === 'object' && !Array.isArray(appData)
+      ? Object.entries(appData)
+      : [];
+    const htmlEntry = appFiles.find(([fileName]) => fileName.toLowerCase() === 'index.html')
+      || appFiles.find(([fileName]) => /\.html?$/i.test(fileName));
+
+    if (appFiles.length) {
+      summary.hasAppData = true;
+      if (!template.appEntry && htmlEntry) summary.appEntry = htmlEntry[0];
+    } else if (appData !== undefined) {
+      summary.hasAppData = false;
+      if (appData === null) summary.appEntry = '';
+    }
+
+    for (const [fileName, contents] of appFiles) {
+      if (typeof contents !== 'string') {
+        throw new TypeError(`Template asset "${fileName}" must be a string`);
+      }
+
+      const embeddedAsset = parseDataUri(contents);
+      await writeAsset(
+        bucket,
+        `${assetPrefix}/app/${encodeURIComponent(fileName)}`,
+        embeddedAsset ? embeddedAsset.contents : Buffer.from(contents),
+        embeddedAsset ? embeddedAsset.contentType : contentTypeFor(fileName)
+      );
+    }
+
+    delete summary.appData;
+    storedTemplates.push(summary);
+  }
+  return storedTemplates;
+}
+
 async function writeValue(bucket, key, value) {
   if (key === 'cm_templates') {
     value = await mergeTemplateAssets(bucket, value);
+    value = await storeTemplateAssets(bucket, value);
   }
 
   const upload = bucket.openUploadStream(key);
