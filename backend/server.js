@@ -110,6 +110,21 @@ app.get(/^\/api\/assets\/([^/]+)\/app\/(.+)$/, (req, res) => {
         return res.status(400).json({ error: 'Invalid asset path' });
     }
 
+    if (mongoStore) {
+        return mongoStore.getTemplateAsset(templateId, assetPath)
+            .then((asset) => {
+                if (!asset) return res.status(404).json({ error: 'Template asset not found' });
+                res.type(asset.contentType);
+                res.set('Cache-Control', 'public, max-age=3600');
+                res.send(asset.body);
+            })
+            .catch((error) => {
+                console.error('GET /api/assets/:id/app/* failed:', error);
+                if (res.headersSent) return res.destroy(error);
+                res.status(500).json({ error: 'Failed to read template asset' });
+            });
+    }
+
     try {
         const templates = readDB().cm_templates;
         const template = Array.isArray(templates)

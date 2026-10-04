@@ -54,6 +54,33 @@ class MongoDataStore {
         await Promise.all(previousFiles.map((file) => this.bucket.delete(file._id)));
     }
 
+    async getTemplateAsset(templateId, assetPath) {
+        const assetPrefix = `template-assets/${encodeURIComponent(templateId)}/app/`;
+        const filenames = new Set([
+            `${assetPrefix}${encodeURIComponent(assetPath)}`,
+            `${assetPrefix}${assetPath}`,
+            `${assetPrefix}${assetPath.split('/').map(encodeURIComponent).join('/')}`
+        ]);
+
+        for (const filename of filenames) {
+            const files = await this.bucket.find({ filename }).sort({ uploadDate: -1 }).toArray();
+            if (!files.length) continue;
+
+            const file = files[0];
+            const chunks = [];
+            for await (const chunk of this.bucket.openDownloadStream(file._id)) {
+                chunks.push(chunk);
+            }
+
+            return {
+                contentType: file.metadata?.contentType || 'application/octet-stream',
+                body: Buffer.concat(chunks)
+            };
+        }
+
+        return null;
+    }
+
     async close() {
         await this.client.close();
     }

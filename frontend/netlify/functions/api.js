@@ -133,9 +133,33 @@ async function readLatestFile(bucket, filename) {
   return readFile(bucket, files[0]);
 }
 
+function normalizeAssetPath(filePath) {
+  return filePath.replace(/\\/g, '/').replace(/^(?:\.\/)+/, '').replace(/^\/+/, '');
+}
+
+function findMatchingAssetPath(paths, requestedPath) {
+  const normalizedRequested = normalizeAssetPath(requestedPath);
+  const exactMatch = paths.find((filePath) =>
+    normalizeAssetPath(filePath) === normalizedRequested
+  );
+  if (exactMatch !== undefined) return exactMatch;
+
+  const lowerRequested = normalizedRequested.toLowerCase();
+  const caseInsensitiveMatch = paths.filter((filePath) =>
+    normalizeAssetPath(filePath).toLowerCase() === lowerRequested
+  );
+  if (caseInsensitiveMatch.length === 1) return caseInsensitiveMatch[0];
+
+  const requestedName = normalizedRequested.split('/').pop().toLowerCase();
+  const basenameMatches = paths.filter((filePath) =>
+    normalizeAssetPath(filePath).split('/').pop().toLowerCase() === requestedName
+  );
+  return basenameMatches.length === 1 ? basenameMatches[0] : undefined;
+}
+
 async function findTemplateAsset(bucket, templateId, assetPath) {
   const assetPrefix = `template-assets/${encodeURIComponent(templateId)}`;
-  const relativePath = assetPath.slice('app/'.length);
+  const relativePath = normalizeAssetPath(assetPath.slice('app/'.length));
   const filenames = [
     `${assetPrefix}/app/${encodeURIComponent(relativePath)}`,
     `${assetPrefix}/app/${relativePath}`,
@@ -147,6 +171,25 @@ async function findTemplateAsset(bucket, templateId, assetPath) {
     if (files.length) return { file: files[0] };
   }
 
+  const escapedPrefix = assetPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const storedFiles = await bucket.find({
+    filename: { $regex: `^${escapedPrefix}/app/` }
+  }).toArray();
+  const storedPaths = new Map();
+  for (const file of storedFiles) {
+    const storedPath = file.filename.slice(`${assetPrefix}/app/`.length);
+    let decodedPath = storedPath;
+    try {
+      decodedPath = decodeURIComponent(storedPath);
+    } catch (error) {
+      // Keep the stored path as-is when it is not URI-encoded.
+    }
+    const normalizedPath = normalizeAssetPath(decodedPath);
+    if (!storedPaths.has(normalizedPath)) storedPaths.set(normalizedPath, file);
+  }
+  const matchedPath = findMatchingAssetPath([...storedPaths.keys()], relativePath);
+  if (matchedPath !== undefined) return { file: storedPaths.get(matchedPath) };
+
   const templates = await readLatestFile(bucket, 'cm_templates');
   const template = Array.isArray(templates)
     ? templates.find((item) => String(item.id) === templateId)
@@ -154,10 +197,7 @@ async function findTemplateAsset(bucket, templateId, assetPath) {
   const appData = template && template.appData;
   if (!appData || typeof appData !== 'object' || Array.isArray(appData)) return null;
 
-  const normalizedPath = relativePath.replace(/\\/g, '/').replace(/^\.\/+/, '');
-  const matchingKey = Object.keys(appData).find((key) =>
-    key.replace(/\\/g, '/').replace(/^\.\/+/, '') === normalizedPath
-  );
+  const matchingKey = findMatchingAssetPath(Object.keys(appData), relativePath);
   if (matchingKey === undefined) return null;
 
   const contents = appData[matchingKey];
