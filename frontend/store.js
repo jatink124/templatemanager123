@@ -147,6 +147,7 @@
         demoUrl: data.demoUrl || "",
         fileName: data.fileName || "",
         appData: data.appData || null,
+        appEntry: data.appEntry || "",
         views: 0,
         sales: 0,
         createdAt: new Date().toISOString(),

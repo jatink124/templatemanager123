@@ -54,6 +54,28 @@ function readDB() {
     }
 }
 
+function getAsset(assetPath, content) {
+    const dataUri = typeof content === 'string'
+        ? content.match(/^data:([^;,]+);base64,([\s\S]*)$/)
+        : null;
+    const extension = path.extname(assetPath).toLowerCase();
+    const contentType = dataUri ? dataUri[1] : ({
+        '.css': 'text/css; charset=utf-8',
+        '.html': 'text/html; charset=utf-8',
+        '.htm': 'text/html; charset=utf-8',
+        '.js': 'text/javascript; charset=utf-8',
+        '.json': 'application/json; charset=utf-8',
+        '.svg': 'image/svg+xml',
+        '.txt': 'text/plain; charset=utf-8',
+        '.xml': 'application/xml; charset=utf-8'
+    })[extension] || 'application/octet-stream';
+
+    return {
+        contentType,
+        body: dataUri ? Buffer.from(dataUri[2], 'base64') : Buffer.from(String(content))
+    };
+}
+
 // GET all data
 app.get('/api/data', (req, res) => {
     if (mongoStore) {
@@ -69,6 +91,53 @@ app.get('/api/data', (req, res) => {
     } catch (error) {
         console.error('GET /api/data failed:', error);
         res.status(500).json({ error: 'Failed to read data store' });
+    }
+});
+
+app.get(/^\/api\/assets\/([^/]+)\/app\/(.+)$/, (req, res) => {
+    let templateId;
+    let assetPath;
+    try {
+        const requestPath = req.originalUrl.split('?')[0];
+        const match = requestPath.match(/^\/api\/assets\/([^/]+)\/app\/(.+)$/);
+        templateId = decodeURIComponent(match[1]);
+        assetPath = decodeURIComponent(match[2]);
+    } catch (error) {
+        return res.status(400).json({ error: 'Invalid asset path' });
+    }
+
+    if (!assetPath || assetPath.split(/[\\/]/).includes('..') || path.isAbsolute(assetPath)) {
+        return res.status(400).json({ error: 'Invalid asset path' });
+    }
+
+    try {
+        const templates = readDB().cm_templates;
+        const template = Array.isArray(templates)
+            ? templates.find((item) => String(item.id) === templateId)
+            : null;
+        const appData = template && template.appData;
+        if (!appData || typeof appData !== 'object' || Array.isArray(appData)) {
+            return res.status(404).json({ error: 'Template asset not found' });
+        }
+
+        let storedPath = assetPath;
+        if (!Object.prototype.hasOwnProperty.call(appData, storedPath)) {
+            const basename = path.posix.basename(assetPath.replace(/\\/g, '/'));
+            const matches = Object.keys(appData).filter((filePath) =>
+                path.posix.basename(filePath.replace(/\\/g, '/')) === basename
+            );
+            if (matches.length !== 1) {
+                return res.status(404).json({ error: 'Template asset not found' });
+            }
+            [storedPath] = matches;
+        }
+
+        const asset = getAsset(storedPath, appData[storedPath]);
+        res.type(asset.contentType);
+        res.send(asset.body);
+    } catch (error) {
+        console.error('GET /api/assets/:id/app/* failed:', error);
+        res.status(500).json({ error: 'Failed to read template asset' });
     }
 });
 

@@ -173,6 +173,7 @@
     let gallery = [];
     let fileName = "";
     let appData = null; 
+    let appEntry = "";
 
     // Render Categories Function
     function renderCats() {
@@ -270,6 +271,7 @@
             gallery,
             demoUrl: document.getElementById("demoInput").value.trim(),
             appData, 
+            appEntry: appEntry || (editing && editing.appEntry) || "",
             downloads,
             rating,
             views: 0,
@@ -301,13 +303,15 @@
             const TEXT_EXT = [".html", ".htm", ".css", ".js", ".mjs", ".json", ".svg", ".txt", ".md"];
             const MIME = {
                 ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
-                ".gif": "image/gif", ".webp": "image/webp", ".ico": "image/x-icon",
+                ".gif": "image/gif", ".webp": "image/webp", ".avif": "image/avif",
+                ".bmp": "image/bmp", ".tif": "image/tiff", ".tiff": "image/tiff",
+                ".ico": "image/x-icon",
                 ".woff": "font/woff", ".woff2": "font/woff2", ".ttf": "font/ttf"
             };
             const filePromises = [];
             zip.forEach((relativePath, zipEntry) => {
                 if (zipEntry.dir) return;
-                const name = relativePath.split("/").pop();
+                const name = relativePath.replace(/\\/g, "/").replace(/^\.\/+/, "");
                 const dot = name.lastIndexOf(".");
                 const ext = dot >= 0 ? name.slice(dot).toLowerCase() : "";
                 if (TEXT_EXT.includes(ext)) {
@@ -322,6 +326,11 @@
             });
 
             await Promise.all(filePromises);
+            const htmlFiles = Object.keys(appData).filter(name => /\.html?$/i.test(name));
+            appEntry = htmlFiles.find(name => name.toLowerCase() === "index.html")
+                || htmlFiles.find(name => name.split("/").pop().toLowerCase() === "index.html")
+                || htmlFiles[0]
+                || "";
             
             const viewsCount = Object.keys(appData).length;
             if (viewsCount > 0) {
@@ -422,6 +431,7 @@
         gallery = editing.gallery || [];
         fileName = editing.fileName || "";
         appData = editing.appData || null;
+        appEntry = editing.appEntry || "";
 
         document.getElementById("uploadTitle").textContent = "Edit Template";
         document.getElementById("uploadSubtitle").textContent = "Update the details of this template and save your changes.";
