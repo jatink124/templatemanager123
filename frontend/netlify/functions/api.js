@@ -68,6 +68,16 @@ function contentTypeFor(fileName) {
     htm: 'text/html; charset=utf-8',
     js: 'text/javascript; charset=utf-8',
     json: 'application/json; charset=utf-8',
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    gif: 'image/gif',
+    webp: 'image/webp',
+    avif: 'image/avif',
+    bmp: 'image/bmp',
+    tif: 'image/tiff',
+    tiff: 'image/tiff',
+    ico: 'image/x-icon',
     svg: 'image/svg+xml',
     txt: 'text/plain; charset=utf-8',
     xml: 'application/xml; charset=utf-8'
@@ -121,6 +131,42 @@ async function readLatestFile(bucket, filename) {
   const files = await bucket.find({ filename }).sort({ uploadDate: -1 }).toArray();
   if (!files.length) return null;
   return readFile(bucket, files[0]);
+}
+
+async function findTemplateAsset(bucket, templateId, assetPath) {
+  const assetPrefix = `template-assets/${encodeURIComponent(templateId)}`;
+  const relativePath = assetPath.slice('app/'.length);
+  const filenames = [
+    `${assetPrefix}/app/${encodeURIComponent(relativePath)}`,
+    `${assetPrefix}/app/${relativePath}`,
+    `${assetPrefix}/app/${relativePath.split('/').map(encodeURIComponent).join('/')}`
+  ];
+
+  for (const filename of new Set(filenames)) {
+    const files = await bucket.find({ filename }).sort({ uploadDate: -1 }).toArray();
+    if (files.length) return { file: files[0] };
+  }
+
+  const templates = await readLatestFile(bucket, 'cm_templates');
+  const template = Array.isArray(templates)
+    ? templates.find((item) => String(item.id) === templateId)
+    : null;
+  const appData = template && template.appData;
+  if (!appData || typeof appData !== 'object' || Array.isArray(appData)) return null;
+
+  const normalizedPath = relativePath.replace(/\\/g, '/').replace(/^\.\/+/, '');
+  const matchingKey = Object.keys(appData).find((key) =>
+    key.replace(/\\/g, '/').replace(/^\.\/+/, '') === normalizedPath
+  );
+  if (matchingKey === undefined) return null;
+
+  const contents = appData[matchingKey];
+  if (typeof contents !== 'string') return null;
+  const embeddedAsset = parseDataUri(contents);
+  return {
+    contents: embeddedAsset ? embeddedAsset.contents : Buffer.from(contents),
+    contentType: embeddedAsset ? embeddedAsset.contentType : contentTypeFor(matchingKey)
+  };
 }
 
 function summarizeData(data) {
@@ -292,30 +338,40 @@ exports.handler = async (event) => {
         return jsonResponse(400, { error: 'Invalid asset path' });
       }
 
-      const filename = `template-assets/${encodeURIComponent(templateId)}/${assetPath === 'image'
-        ? 'image'
-        : assetPath.startsWith('gallery/')
-          ? assetPath
-          : `app/${encodeURIComponent(assetPath.slice('app/'.length))}`}`;
       const bucket = await getBucket();
-      const files = await bucket.find({ filename }).sort({ uploadDate: -1 }).toArray();
-      if (!files.length) {
-        return jsonResponse(404, { error: 'Template asset not found' });
+      let asset;
+      if (assetPath.startsWith('app/')) {
+        asset = await findTemplateAsset(bucket, templateId, assetPath);
+      } else {
+        const filename = `template-assets/${encodeURIComponent(templateId)}/${assetPath}`;
+        const files = await bucket.find({ filename }).sort({ uploadDate: -1 }).toArray();
+        if (files.length) asset = { file: files[0] };
       }
 
-      const chunks = [];
-      for await (const chunk of bucket.openDownloadStream(files[0]._id)) {
-        chunks.push(chunk);
+      if (!asset) return jsonResponse(404, { error: 'Template asset not found' });
+
+      let contents;
+      let contentType;
+      if (asset.file) {
+        const chunks = [];
+        for await (const chunk of bucket.openDownloadStream(asset.file._id)) {
+          chunks.push(chunk);
+        }
+        contents = Buffer.concat(chunks);
+        contentType = asset.file.metadata?.contentType || 'application/octet-stream';
+      } else {
+        contents = asset.contents;
+        contentType = asset.contentType;
       }
 
       return {
         statusCode: 200,
         headers: {
-          'Content-Type': files[0].metadata?.contentType || 'application/octet-stream',
+          'Content-Type': contentType,
           'Cache-Control': 'public, max-age=3600'
         },
         isBase64Encoded: true,
-        body: Buffer.concat(chunks).toString('base64')
+        body: contents.toString('base64')
       };
     } catch (error) {
       console.error('GET /api/assets/:id/* failed:', error);
