@@ -896,15 +896,37 @@
     
     document.addEventListener("cm:changed", () => { renderPills(); renderCategories(); render(); });
     document.addEventListener("cm:ready", () => { renderPills(); renderCategories(); render(); });
+    document.addEventListener("load", event => {
+        const image = event.target;
+        if (!(image instanceof HTMLImageElement) || image.dataset.imageRetryState !== "retrying") return;
+        delete image.dataset.imageRetryState;
+        delete image.dataset.imageRetrySource;
+        image.classList.remove("object-contain", "p-8");
+        image.classList.add("object-cover");
+    }, true);
     document.addEventListener("error", event => {
         const image = event.target;
-        if (!(image instanceof HTMLImageElement) || image.dataset.imageFallback) return;
-        image.dataset.imageFallback = "true";
-        const source = image.currentSrc || image.src;
+        if (!(image instanceof HTMLImageElement)) return;
+
+        const retryState = image.dataset.imageRetryState;
+        if (retryState === "waiting" || retryState === "failed") return;
+        const source = retryState === "retrying"
+            ? image.dataset.imageRetrySource
+            : image.currentSrc || image.src;
+        image.dataset.imageRetryState = retryState === "retrying" ? "failed" : "waiting";
+        image.dataset.imageRetrySource = source;
         console.error("Image failed to load:", image.alt, source.startsWith("data:") ? "embedded image" : source);
         image.classList.remove("object-cover");
         image.classList.add("object-contain", "p-8");
         image.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 100'%3E%3Crect width='160' height='100' fill='%23f3f4f6'/%3E%3Cpath d='M34 70l25-27 18 18 14-13 35 35H34z' fill='%239ca3af'/%3E%3Ccircle cx='108' cy='34' r='9' fill='%239ca3af'/%3E%3C/svg%3E";
+
+        if (retryState !== "retrying") {
+            window.setTimeout(() => {
+                if (!image.isConnected || image.dataset.imageRetryState !== "waiting") return;
+                image.dataset.imageRetryState = "retrying";
+                image.src = image.dataset.imageRetrySource;
+            }, 5000);
+        }
     }, true);
 
     window.downloadTemplate = function(id, event) {
