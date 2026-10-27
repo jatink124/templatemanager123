@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const auth = require('../../../backend/auth');
 const customerAuth = require('../../../backend/customer-auth');
+const imageContentType = require('../../../backend/image-content-type');
 const { createInquiry, InquiryValidationError } = require('../../../backend/inquiries');
 
 const DATABASE_NAME = process.env.MONGODB_DATABASE || 'codemarket';
@@ -704,7 +705,7 @@ exports.handler = async (event) => {
       return {
         statusCode: 200,
         headers: {
-          'Content-Type': contentType,
+          'Content-Type': imageContentType(contents, contentType),
           'Cache-Control': 'public, max-age=3600'
         },
         isBase64Encoded: true,

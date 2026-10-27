@@ -7,6 +7,7 @@ const { execFile } = require('child_process');
 const { randomUUID } = require('node:crypto');
 const bodyParser = require('body-parser');
 const MongoDataStore = require('./mongo-data-store');
+const imageContentType = require('./image-content-type');
 const auth = require('./auth');
 const customerAuth = require('./customer-auth');
 const { createInquiry, InquiryValidationError } = require('./inquiries');
@@ -319,7 +320,8 @@ function getAsset(assetPath, content) {
         ? content.match(/^data:([^;,]+);base64,([\s\S]*)$/)
         : null;
     const extension = path.extname(assetPath).toLowerCase();
-    const contentType = dataUri ? dataUri[1] : ({
+    const body = dataUri ? Buffer.from(dataUri[2], 'base64') : Buffer.from(String(content));
+    const contentType = imageContentType(body, dataUri ? dataUri[1] : ({
         '.css': 'text/css; charset=utf-8',
         '.html': 'text/html; charset=utf-8',
         '.htm': 'text/html; charset=utf-8',
@@ -328,11 +330,11 @@ function getAsset(assetPath, content) {
         '.svg': 'image/svg+xml',
         '.txt': 'text/plain; charset=utf-8',
         '.xml': 'application/xml; charset=utf-8'
-    })[extension] || 'application/octet-stream';
+    })[extension] || 'application/octet-stream');
 
     return {
         contentType,
-        body: dataUri ? Buffer.from(dataUri[2], 'base64') : Buffer.from(String(content))
+        body
     };
 }
 
@@ -424,7 +426,7 @@ app.get(/^\/api\/assets\/([^/]+)\/(image|gallery\/\d+)$/, (req, res) => {
         return mongoStore.getTemplateMedia(templateId, assetPath)
             .then((asset) => {
                 if (!asset) return res.status(404).json({ error: 'Template asset not found' });
-                res.type(asset.contentType);
+                res.type(imageContentType(asset.body, asset.contentType));
                 res.set('Cache-Control', 'public, max-age=3600');
                 res.send(asset.body);
             })
