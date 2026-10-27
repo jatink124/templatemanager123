@@ -1,4 +1,10 @@
 const { MongoClient, GridFSBucket } = require('mongodb');
+const { randomUUID } = require('node:crypto');
+const fs = require('fs');
+const path = require('path');
+const auth = require('../../../backend/auth');
+const customerAuth = require('../../../backend/customer-auth');
+const { createInquiry, InquiryValidationError } = require('../../../backend/inquiries');
 
 const DATABASE_NAME = process.env.MONGODB_DATABASE || 'codemarket';
 let bucketPromise;
@@ -21,10 +27,14 @@ function getBucket() {
   return bucketPromise;
 }
 
-function jsonResponse(statusCode, value) {
+function jsonResponse(statusCode, value, headers = {}) {
   return {
     statusCode,
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+      ...headers
+    },
     body: JSON.stringify(value)
   };
 }
@@ -49,6 +59,40 @@ function parseRequestBody(event) {
     ? Buffer.from(event.body || '', 'base64').toString('utf8')
     : event.body || '';
   return JSON.parse(body);
+}
+
+function getCookieHeader(event) {
+  return event.headers?.cookie || event.headers?.Cookie || '';
+}
+
+function isAdminRequest(event) {
+  return auth.isAuthenticated(getCookieHeader(event));
+}
+
+function customerIdFromEvent(event) {
+  return customerAuth.customerIdFromCookie(getCookieHeader(event));
+}
+
+function publicCustomer(customer) {
+  return {
+    id: customer.id,
+    name: customer.name,
+    email: customer.email
+  };
+}
+
+async function readCustomers(bucket) {
+  const customers = await readLatestFile(bucket, 'cm_customers');
+  return Array.isArray(customers) ? customers : [];
+}
+
+async function writeCustomers(bucket, customers) {
+  await writeValue(bucket, 'cm_customers', customers);
+}
+
+function isJsonRequest(event) {
+  const contentType = event.headers?.['content-type'] || event.headers?.['Content-Type'] || '';
+  return /^application\/json(?:\s*;|$)/i.test(contentType);
 }
 
 function parseDataUri(value) {
@@ -360,12 +404,265 @@ exports.handler = async (event) => {
     return jsonResponse(400, { error: 'Invalid API path' });
   }
 
+  if (routePath === '/dashboard' && event.httpMethod === 'GET') {
+    if (!isAdminRequest(event)) {
+      return {
+        statusCode: 302,
+        headers: { Location: '/login.html', 'Cache-Control': 'no-store' },
+        body: ''
+      };
+    }
+
+    try {
+      const dashboardPath = [
+        path.join(__dirname, '..', '..', 'dashboard.html'),
+        path.join(process.cwd(), 'frontend', 'dashboard.html'),
+        path.join(process.cwd(), 'dashboard.html')
+      ].find((candidate) => fs.existsSync(candidate));
+      if (!dashboardPath) throw new Error('Dashboard file was not included in the function bundle');
+      const dashboard = fs.readFileSync(dashboardPath, 'utf8');
+      return {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-store'
+        },
+        body: dashboard
+      };
+    } catch (error) {
+      console.error('GET /dashboard.html failed:', error);
+      return jsonResponse(500, { error: 'Failed to load dashboard' });
+    }
+  }
+
+  if (routePath === '/auth/login' && event.httpMethod === 'POST') {
+    if (!isJsonRequest(event)) {
+      return jsonResponse(415, { error: 'Expected an application/json request' });
+    }
+    if (auth.getConfigurationError()) {
+      return jsonResponse(503, { error: 'Authentication is not configured' });
+    }
+
+    let credentials;
+    try {
+      credentials = parseRequestBody(event);
+    } catch (error) {
+      return jsonResponse(400, { error: 'Invalid JSON request body' });
+    }
+    if (!auth.credentialsAreValid(credentials?.username, credentials?.password)) {
+      return jsonResponse(401, { error: 'Invalid username or password' });
+    }
+
+    const token = auth.createSessionToken(process.env.SESSION_SECRET);
+    return jsonResponse(200, { success: true }, {
+      'Set-Cookie': auth.createSessionCookie(token)
+    });
+  }
+
+  if (routePath === '/auth/session' && event.httpMethod === 'GET') {
+    if (auth.getConfigurationError()) {
+      return jsonResponse(503, { error: 'Authentication is not configured' });
+    }
+    if (!isAdminRequest(event)) return jsonResponse(401, { authenticated: false });
+    return jsonResponse(200, { authenticated: true });
+  }
+
+  if (routePath === '/auth/logout' && event.httpMethod === 'POST') {
+    if (!isJsonRequest(event)) {
+      return jsonResponse(415, { error: 'Expected an application/json request' });
+    }
+    return jsonResponse(200, { success: true }, {
+      'Set-Cookie': auth.clearSessionCookie()
+    });
+  }
+
+  if (routePath === '/customer/auth/config' && event.httpMethod === 'GET') {
+    return jsonResponse(200, { googleClientId: process.env.GOOGLE_CLIENT_ID || '' });
+  }
+
+  if (routePath === '/customer/auth/session' && event.httpMethod === 'GET') {
+    const customerId = customerIdFromEvent(event);
+    if (!customerId) return jsonResponse(200, { authenticated: false });
+
+    try {
+      const customers = await readCustomers(await getBucket());
+      const customer = customers.find((item) => item.id === customerId);
+      if (!customer) {
+        return jsonResponse(200, { authenticated: false }, {
+          'Set-Cookie': customerAuth.clearSessionCookie()
+        });
+      }
+      return jsonResponse(200, { authenticated: true, user: publicCustomer(customer) });
+    } catch (error) {
+      console.error('GET /api/customer/auth/session failed:', error);
+      return jsonResponse(500, { error: 'Could not load customer session' });
+    }
+  }
+
+  const customerAuthRoute = routePath.match(/^\/customer\/auth\/(register|login|google|logout)$/);
+  if (customerAuthRoute && event.httpMethod === 'POST') {
+    if (!isJsonRequest(event)) {
+      return jsonResponse(415, { error: 'Expected an application/json request' });
+    }
+    if (customerAuthRoute[1] === 'logout') {
+      return jsonResponse(200, { success: true }, {
+        'Set-Cookie': customerAuth.clearSessionCookie()
+      });
+    }
+
+    if (customerAuth.getConfigurationError()) {
+      return jsonResponse(503, { error: customerAuth.getConfigurationError() });
+    }
+    let input;
+    try {
+      input = parseRequestBody(event);
+    } catch (error) {
+      return jsonResponse(400, { error: 'Invalid JSON request body' });
+    }
+
+    try {
+      const bucket = await getBucket();
+      const customers = await readCustomers(bucket);
+      const method = customerAuthRoute[1];
+      let customer;
+
+      if (method === 'register') {
+        const details = customerAuth.validateRegistration(input);
+        if (customers.some((item) => item.email === details.email)) {
+          return jsonResponse(409, { error: 'An account with this email already exists' });
+        }
+        customer = {
+          id: randomUUID(),
+          name: details.name,
+          email: details.email,
+          passwordHash: await customerAuth.hashPassword(details.password),
+          createdAt: new Date().toISOString()
+        };
+        customers.unshift(customer);
+        await writeCustomers(bucket, customers);
+        return jsonResponse(201, { success: true, user: publicCustomer(customer) }, {
+          'Set-Cookie': customerAuth.createSessionCookie(customer.id)
+        });
+      }
+
+      if (method === 'login') {
+        const email = customerAuth.normalizeEmail(input?.email);
+        customer = customers.find((item) => item.email === email);
+        if (!customer || !await customerAuth.passwordMatches(input?.password, customer.passwordHash)) {
+          return jsonResponse(401, { error: 'Email or password is incorrect' });
+        }
+      } else {
+        const profile = await customerAuth.verifyGoogleCredential(input?.credential);
+        let googleCustomer = customers.find((item) => item.googleSub === profile.googleSub);
+        if (!googleCustomer) {
+          googleCustomer = customers.find((item) => item.email === profile.email);
+          if (googleCustomer && googleCustomer.googleSub
+            && googleCustomer.googleSub !== profile.googleSub) {
+            return jsonResponse(409, {
+              error: 'This email is linked to a different Google account'
+            });
+          }
+        }
+        if (googleCustomer) {
+          googleCustomer.googleSub = profile.googleSub;
+          googleCustomer.name = profile.name;
+          customer = googleCustomer;
+        } else {
+          customer = {
+            id: randomUUID(),
+            name: profile.name,
+            email: profile.email,
+            googleSub: profile.googleSub,
+            createdAt: new Date().toISOString()
+          };
+          customers.unshift(customer);
+        }
+        await writeCustomers(bucket, customers);
+      }
+
+      return jsonResponse(200, { success: true, user: publicCustomer(customer) }, {
+        'Set-Cookie': customerAuth.createSessionCookie(customer.id)
+      });
+    } catch (error) {
+      if (error instanceof customerAuth.CustomerAuthError) {
+        return jsonResponse(error.statusCode, { error: error.message });
+      }
+      console.error(`POST /api${routePath} failed:`, error);
+      return jsonResponse(500, { error: 'Could not complete sign-in' });
+    }
+  }
+
   if (event.httpMethod === 'GET' && routePath === '/data') {
     try {
-      return jsonResponse(200, summarizeData(await readAll(await getBucket())));
+      const data = summarizeData(await readAll(await getBucket()));
+      if (isAdminRequest(event)) {
+        delete data.cm_customers;
+        return jsonResponse(200, data);
+      }
+      const publicData = {};
+      for (const key of ['cm_templates', 'cm_categories']) {
+        if (!Object.prototype.hasOwnProperty.call(data, key)) continue;
+        publicData[key] = key === 'cm_templates' && Array.isArray(data[key])
+          ? data[key]
+            .filter((template) => template.status === 'Published')
+            .map((template) => {
+              const { sales, views, ...publicTemplate } = template;
+              return publicTemplate;
+            })
+          : data[key];
+      }
+      return jsonResponse(200, publicData);
     } catch (error) {
       console.error('GET /api/data failed:', error);
       return jsonResponse(500, { error: 'Failed to read data store' });
+    }
+  }
+
+  if (event.httpMethod === 'POST' && routePath === '/inquiries') {
+    if (!isJsonRequest(event)) {
+      return jsonResponse(415, { error: 'Expected an application/json request' });
+    }
+
+    let input;
+    try {
+      input = parseRequestBody(event);
+    } catch (error) {
+      return jsonResponse(400, { error: 'Invalid JSON request body' });
+    }
+
+    try {
+      const bucket = await getBucket();
+      const templates = await readLatestFile(bucket, 'cm_templates');
+      const template = Array.isArray(templates)
+        ? templates.find((item) => String(item.id) === String(input?.templateId))
+        : null;
+      const inquiry = createInquiry(input, template);
+      const current = await readLatestFile(bucket, 'cm_inquiries');
+      await writeValue(bucket, 'cm_inquiries', [
+        inquiry,
+        ...(Array.isArray(current) ? current : [])
+      ]);
+      return jsonResponse(201, { success: true, inquiryId: inquiry.id });
+    } catch (error) {
+      if (error instanceof InquiryValidationError) {
+        return jsonResponse(error.statusCode, { error: error.message });
+      }
+      console.error('POST /api/inquiries failed:', error);
+      return jsonResponse(500, { error: 'Failed to save inquiry' });
+    }
+  }
+
+  if (event.httpMethod === 'GET' && routePath === '/inquiries') {
+    if (!isAdminRequest(event)) {
+      return jsonResponse(401, { error: 'Authentication required' });
+    }
+
+    try {
+      const inquiries = await readLatestFile(await getBucket(), 'cm_inquiries');
+      return jsonResponse(200, Array.isArray(inquiries) ? inquiries : []);
+    } catch (error) {
+      console.error('GET /api/inquiries failed:', error);
+      return jsonResponse(500, { error: 'Failed to read inquiries' });
     }
   }
 
@@ -421,6 +718,13 @@ exports.handler = async (event) => {
 
   const dataKeyMatch = routePath.match(/^\/data\/([^/]+)$/);
   if (event.httpMethod === 'POST' && dataKeyMatch) {
+    if (!isAdminRequest(event)) {
+      return jsonResponse(401, { error: 'Authentication required' });
+    }
+    if (!isJsonRequest(event)) {
+      return jsonResponse(415, { error: 'Expected an application/json request' });
+    }
+
     let value;
     try {
       value = parseRequestBody(event);

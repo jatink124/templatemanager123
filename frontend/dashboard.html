@@ -92,6 +92,7 @@
                         <div id="userName" class="text-sm font-bold text-gray-900 leading-tight">Jatin K</div>
                         <div class="text-[12px] text-gray-500">Seller</div>
                     </div>
+                    <button type="button" onclick="CodeMarketAuth.logout()" class="text-sm font-semibold text-gray-500 hover:text-brand-600">Sign out</button>
                 </div>
             </div>
         </header>
@@ -100,6 +101,7 @@
     </div>
 
     <!-- Load LocalStorage state manager -->
+    <script src="auth.js"></script>
     <script src="config.js"></script>
     <script src="store.js"></script>
     <script>
@@ -136,6 +138,9 @@
             const settings = Store.settings();
             const recent = Store.templates().slice(0, 5);
             const sales = Store.sales().slice(0, 5);
+            const inquiries = Store.inquiries();
+            const newInquiries = inquiries.filter(inquiry => inquiry.status === "New").length;
+            const recentInquiries = inquiries.slice(0, 5);
 
             return `
             <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
@@ -223,8 +228,39 @@
                                 </div>
                             </div>`).join("") : `<p class="text-sm text-gray-500">No sales yet. Record one on the Sales page.</p>`}
                     </div>
+                    <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
+                        <div class="flex items-center justify-between gap-3 mb-4">
+                            <div class="flex items-center gap-2">
+                                <h4 class="font-bold text-gray-900">Template inquiries</h4>
+                                ${newInquiries ? `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-[11px] font-bold">${newInquiries} new</span>` : ""}
+                            </div>
+                            <button type="button" onclick="enableInquiryNotifications()" class="text-brand-600 text-xs font-semibold hover:underline whitespace-nowrap">Enable alerts</button>
+                        </div>
+                        ${recentInquiries.length ? recentInquiries.map(inquiry => `
+                            <div class="py-3 border-b border-gray-50 last:border-0">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="font-semibold text-gray-900">${Store.escape(inquiry.name)}</div>
+                                    <div class="text-[11px] text-gray-400 whitespace-nowrap">${Store.date(inquiry.createdAt)}</div>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-0.5">${Store.escape(inquiry.templateTitle)} · <a class="text-brand-600 hover:underline" href="mailto:${encodeURIComponent(inquiry.email)}">${Store.escape(inquiry.email)}</a></div>
+                                ${inquiry.phone ? `<div class="text-xs text-gray-500 mt-1">${Store.escape(inquiry.phone)}</div>` : ""}
+                                <p class="text-sm text-gray-700 mt-2 whitespace-pre-wrap break-words">${Store.escape(inquiry.message)}</p>
+                            </div>`).join("") : `<p class="text-sm text-gray-500">No template inquiries yet. Requests sent from the storefront will appear here.</p>`}
+                    </div>
                 </div>
             </div>`;
+        }
+
+        async function enableInquiryNotifications() {
+            if (!("Notification" in window)) {
+                Store.toast("Browser notifications are not supported here");
+                return;
+            }
+
+            const permission = await Notification.requestPermission();
+            Store.toast(permission === "granted"
+                ? "Browser alerts enabled for new inquiries"
+                : "Browser notifications were not enabled");
         }
 
         // ---- Shared CRUD helpers available to every page fragment ----
@@ -317,7 +353,32 @@
             }
         });
 
-       document.addEventListener("cm:changed", syncUser);
+        let knownInquiryIds = null;
+        document.addEventListener("cm:changed", syncUser);
+        document.addEventListener("cm:ready", () => {
+            knownInquiryIds = new Set(Store.inquiries().map(inquiry => inquiry.id));
+            if (currentPage === "dashboard") appContent.innerHTML = dashboardView();
+        });
+        document.addEventListener("cm:refreshed", () => {
+            const inquiries = Store.inquiries();
+            if (knownInquiryIds) {
+                inquiries.filter(inquiry => !knownInquiryIds.has(inquiry.id)).forEach(inquiry => {
+                    Store.toast(`New inquiry from ${inquiry.name}: ${inquiry.templateTitle}`);
+                    if ("Notification" in window && Notification.permission === "granted") {
+                        new Notification("New template inquiry", {
+                            body: `${inquiry.name} asked about ${inquiry.templateTitle}`
+                        });
+                    }
+                });
+            }
+            knownInquiryIds = new Set(inquiries.map(inquiry => inquiry.id));
+            if (currentPage === "dashboard") appContent.innerHTML = dashboardView();
+        });
+        window.setInterval(() => {
+            if (document.visibilityState === "visible") {
+                Store.refreshInquiries().catch(error => console.error("Could not refresh inquiries.", error));
+            }
+        }, 30000);
         syncUser();
         loadPage("dashboard");
     </script>

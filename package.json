@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./backend/server.js"
+    "start": "node --env-file-if-exists=.env ./backend/server.js"
   }
 }

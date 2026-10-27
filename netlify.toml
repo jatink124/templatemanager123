@@ -1,6 +1,16 @@
 [build]
+  base = "frontend"
   publish = "."
   functions = "netlify/functions"
+
+[functions]
+  included_files = ["dashboard.html"]
+
+[[redirects]]
+  from = "/dashboard.html"
+  to = "/.netlify/functions/api/dashboard"
+  status = 200
+  force = true
 
 [[redirects]]
   from = "/api/*"

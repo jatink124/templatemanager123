@@ -15,7 +15,7 @@ class MongoDataStore {
         });
     }
 
-    async sendAll(res) {
+    async sendAll(res, allowedKeys = null) {
         const files = await this.bucket.find().sort({ uploadDate: 1 }).toArray();
         const latestByKey = new Map();
         for (const file of files) latestByKey.set(file.filename, file);
@@ -25,9 +25,29 @@ class MongoDataStore {
         let first = true;
 
         for (const [key, file] of latestByKey) {
+            if (key === 'cm_customers') continue;
+            if (allowedKeys && !allowedKeys.has(key)) continue;
             if (!first) res.write(',');
             first = false;
             res.write(`${JSON.stringify(key)}:`);
+
+            if (allowedKeys && key === 'cm_templates') {
+                const chunks = [];
+                for await (const chunk of this.bucket.openDownloadStream(file._id)) {
+                    chunks.push(chunk);
+                }
+                const templates = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+                const publicTemplates = Array.isArray(templates)
+                    ? templates
+                        .filter((template) => template && template.status === 'Published')
+                        .map((template) => {
+                            const { appData, sales, views, ...publicTemplate } = template;
+                            return publicTemplate;
+                        })
+                    : templates;
+                res.write(JSON.stringify(publicTemplates));
+                continue;
+            }
 
             for await (const chunk of this.bucket.openDownloadStream(file._id)) {
                 if (!res.write(chunk)) await once(res, 'drain');
@@ -52,6 +72,22 @@ class MongoDataStore {
             _id: { $ne: upload.id }
         }).toArray();
         await Promise.all(previousFiles.map((file) => this.bucket.delete(file._id)));
+    }
+
+    async read(key) {
+        const files = await this.bucket.find({ filename: key }).sort({ uploadDate: -1 }).toArray();
+        if (!files.length) return null;
+
+        const chunks = [];
+        for await (const chunk of this.bucket.openDownloadStream(files[0]._id)) {
+            chunks.push(chunk);
+        }
+        return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    }
+
+    async append(key, value) {
+        const current = await this.read(key);
+        await this.write(key, [value, ...(Array.isArray(current) ? current : [])]);
     }
 
     async getTemplateAsset(templateId, assetPath) {
@@ -79,6 +115,23 @@ class MongoDataStore {
         }
 
         return null;
+    }
+
+    async getTemplateMedia(templateId, assetPath) {
+        const filename = `template-assets/${encodeURIComponent(templateId)}/${assetPath}`;
+        const files = await this.bucket.find({ filename }).sort({ uploadDate: -1 }).toArray();
+        if (!files.length) return null;
+
+        const file = files[0];
+        const chunks = [];
+        for await (const chunk of this.bucket.openDownloadStream(file._id)) {
+            chunks.push(chunk);
+        }
+
+        return {
+            contentType: file.metadata?.contentType || 'application/octet-stream',
+            body: Buffer.concat(chunks)
+        };
     }
 
     async close() {

@@ -48,13 +48,13 @@
 
             <!-- Actions -->
             <div class="flex items-center gap-6 shrink-0">
-                <button class="flex items-center gap-2 text-[14px] font-semibold text-gray-600 hover:text-gray-900 transition-colors">
+                <button type="button" onclick="openCustomerArea('favorites')" class="flex items-center gap-2 text-[14px] font-semibold text-gray-600 hover:text-gray-900 transition-colors">
                     <i class="ph ph-heart text-2xl text-gray-400"></i> Favorites
                 </button>
-                <button class="flex items-center gap-2 text-[14px] font-semibold text-gray-600 hover:text-gray-900 transition-colors relative">
+                <button type="button" onclick="openCustomerArea('cart')" class="flex items-center gap-2 text-[14px] font-semibold text-gray-600 hover:text-gray-900 transition-colors relative">
                     <div class="relative">
                         <i class="ph ph-shopping-cart text-2xl text-gray-400"></i>
-                        <span class="absolute -top-1.5 -right-1.5 bg-brand text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-white box-content">3</span>
+                        <span id="cart-count" class="absolute -top-1.5 -right-1.5 bg-brand text-white text-[10px] font-bold min-w-4 h-4 px-1 rounded-full flex items-center justify-center border-2 border-white box-content">0</span>
                     </div>
                     Cart
                 </button>
@@ -143,8 +143,7 @@
         <main class="flex-1 w-full min-w-0 flex flex-col">
             
             <!-- Redesigned Hero Banner -->
-            <!-- Redesigned Hero Banner -->
-<section id="hero-banner" class="relative w-full bg-gradient-to-r from-[#F0F5FF] to-[#E2EEFF] rounded-2xl border border-blue-100 p-6 sm:p-8 lg:p-10 mb-8 flex flex-col xl:flex-row items-center justify-between overflow-hidden transition-all duration-300">
+            <section id="hero-banner" class="relative w-full bg-gradient-to-r from-[#F0F5FF] to-[#E2EEFF] rounded-2xl border border-blue-100 p-6 sm:p-8 lg:p-10 mb-8 flex flex-col xl:flex-row items-center justify-between overflow-hidden transition-all duration-300">
                 
                 <!-- Left Content (Text) -->
                 <div class="relative z-10 w-full xl:max-w-[480px] pb-6 xl:pb-0">
@@ -284,9 +283,65 @@
         <div id="detail-content"></div>
     </main>
 
+    <div id="customer-auth-modal" class="hidden fixed inset-0 z-[10001] bg-gray-950/60 backdrop-blur-sm p-4 flex items-center justify-center" role="presentation" onclick="if(event.target === this) closeCustomerArea()">
+        <section class="relative w-full max-w-md rounded-2xl bg-white p-7 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="customer-auth-title">
+            <button type="button" onclick="closeCustomerArea()" aria-label="Close" class="absolute right-4 top-4 rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700">
+                <i class="ph-bold ph-x text-lg"></i>
+            </button>
+            <div class="mb-6">
+                <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-brand">
+                    <i id="customer-auth-icon" class="ph-bold ph-user-circle text-2xl"></i>
+                </div>
+                <h2 id="customer-auth-title" class="text-2xl font-extrabold text-gray-900">Sign in to continue</h2>
+                <p id="customer-auth-description" class="mt-1 text-sm text-gray-500">Sign in to access your cart and favorites.</p>
+            </div>
+
+            <div id="customer-login-view">
+                <div id="customer-google-wrap" class="mb-5">
+                    <button id="google-signin-unconfigured" type="button" disabled class="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-600 disabled:cursor-not-allowed">
+                        <span class="text-lg font-extrabold text-blue-600">G</span> Continue with Google
+                    </button>
+                    <div id="google-signin-button" class="flex min-h-10 justify-center"></div>
+                    <p id="google-signin-setup" class="hidden mt-2 text-center text-xs text-gray-500">Google sign-in needs a Google OAuth client ID configured by the site owner.</p>
+                    <p id="google-signin-error" class="hidden mt-2 text-center text-sm text-red-600" role="alert"></p>
+                </div>
+                <div class="mb-5 flex items-center gap-3 text-xs text-gray-400">
+                    <span class="h-px flex-1 bg-gray-200"></span><span>or use email</span><span class="h-px flex-1 bg-gray-200"></span>
+                </div>
+                <form id="customer-auth-form" class="space-y-4">
+                    <label id="customer-name-wrap" class="hidden block text-sm font-semibold text-gray-700">
+                        Your name
+                        <input id="customer-name" name="name" type="text" maxlength="120" autocomplete="name" class="mt-1.5 w-full rounded-lg border border-gray-200 px-3 py-2.5 font-normal focus:border-brand focus:outline-none focus:ring-2 focus:ring-blue-100">
+                    </label>
+                    <label class="block text-sm font-semibold text-gray-700">
+                        Email address
+                        <input id="customer-email" name="email" type="email" maxlength="254" autocomplete="email" required class="mt-1.5 w-full rounded-lg border border-gray-200 px-3 py-2.5 font-normal focus:border-brand focus:outline-none focus:ring-2 focus:ring-blue-100">
+                    </label>
+                    <label class="block text-sm font-semibold text-gray-700">
+                        Password
+                        <input id="customer-password" name="password" type="password" minlength="10" maxlength="128" autocomplete="current-password" required class="mt-1.5 w-full rounded-lg border border-gray-200 px-3 py-2.5 font-normal focus:border-brand focus:outline-none focus:ring-2 focus:ring-blue-100">
+                    </label>
+                    <p id="customer-auth-error" class="hidden text-sm text-red-600" role="alert"></p>
+                    <button id="customer-submit" type="submit" class="w-full rounded-lg bg-brand px-4 py-3 font-bold text-white transition-colors hover:bg-blue-700">Sign in</button>
+                </form>
+                <p class="mt-5 text-center text-sm text-gray-500">
+                    <span id="customer-mode-prompt">New here?</span>
+                    <button id="customer-mode-toggle" type="button" class="font-bold text-brand hover:underline">Create account</button>
+                </p>
+            </div>
+
+            <div id="customer-account-view" class="hidden">
+                <p id="customer-account-label" class="mb-4 text-sm text-gray-600"></p>
+                <div id="customer-area-content"></div>
+                <button id="customer-logout" type="button" class="mt-5 w-full rounded-lg border border-gray-200 px-4 py-2.5 font-semibold text-gray-700 hover:bg-gray-50">Sign out</button>
+            </div>
+        </section>
+    </div>
+
     <!-- Scripts -->
     <script src="config.js"></script>
     <script src="store.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
 (function () {
     let query = "";
@@ -310,9 +365,38 @@
         { id: 'm10', title: 'IT Services', description: 'Clean template for IT companies and agencies.', category: 'Technology', price: 30, badge: 'Premium', downloads: 900, rating: 4.8, image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800', demoUrl: 'https://example.com', features: ['responsive', 'seo', 'multipage'] }
     ];
 
-  function getAllTemplates() {
-        return typeof Store !== 'undefined' && Store.published ? [...Store.published()] : [];
+    function getAllTemplates() {
+        const published = typeof Store !== 'undefined' && Store.published ? [...Store.published()] : [];
+        return published.length ? published : mockTemplates;
     }
+
+    // --- WhatsApp Pre-filled Message Helper ---
+    function getWhatsAppConfig(templateTitle, extraDetails = "") {
+        const settings = (typeof Store !== 'undefined' && Store.settings) ? Store.settings() : {};
+        const rawPhone = settings.phone || "+919779127286";
+        const cleanPhone = rawPhone.replace(/\D/g, "");
+        
+        const rawTemplateMsg = settings.whatsappMessage || "Hi! I'm interested in using the {title} template";
+        let finalMessage = rawTemplateMsg.replace(/\{title\}/gi, templateTitle || "Website");
+        
+        if (extraDetails) {
+            finalMessage += "\n\n" + extraDetails;
+        }
+
+        const url = cleanPhone 
+            ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(finalMessage)}`
+            : `https://wa.me/?text=${encodeURIComponent(finalMessage)}`;
+
+        return { url, finalMessage, rawPhone };
+    }
+
+    window.openWhatsAppWithTemplate = function(id, event) {
+        if (event) event.stopPropagation();
+        const list = getAllTemplates();
+        const t = list.find(x => String(x.id) === String(id)) || window.currentPreviewTemplate || { title: 'Website' };
+        const { url } = getWhatsAppConfig(t.title);
+        window.open(url, '_blank', 'noopener,noreferrer');
+    };
 
     function visible() {
         let list = getAllTemplates();
@@ -448,23 +532,18 @@
             ? `<span class="bg-green-50 text-green-600 text-[11px] font-bold px-3 py-1.5 rounded-md tracking-wide">Free</span>`
             : `<span class="bg-blue-50 text-brand text-[11px] font-bold px-3 py-1.5 rounded-md tracking-wide">Premium</span>`;
 
-        const gallery = t.gallery && t.gallery.length >= 4 ? t.gallery : [t.image, t.image, t.image, t.image];
-        const thumbsHtml = gallery.slice(0, 4).map(img => 
-            `<div class="aspect-square bg-gray-100 rounded-md overflow-hidden border border-gray-200 cursor-pointer hover:border-brand transition-colors"><img src="${escapeHTML(img)}" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity"></div>`
-        ).join('');
-
         return `
         <article class="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
             <div class="relative aspect-[16/10] bg-gray-100 overflow-hidden cursor-pointer border-b border-gray-100" onclick="showDetail('${t.id}')">
-                <img src="${escapeHTML(t.image || 'https://via.placeholder.com/400x250')}" alt="${escapeHTML(t.title)}" loading="lazy" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                <img src="${escapeHTML(t.image || 'https://via.placeholder.com/400x250')}" alt="${escapeHTML(t.title)}" loading="lazy" decoding="async" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
             </div>
             
             <div class="p-6 flex flex-col flex-grow">
                 <div class="flex items-center justify-between mb-4">
                     ${badgeHtml}
-                <button onclick="toggleGridLike(this, event, '${t.id}')" class="text-gray-400 hover:text-red-500 transition-colors" title="Add to Favorites">
-    <i class="ph ph-heart text-[22px]"></i>
-</button>
+                    <button onclick="toggleGridLike(this, event, '${t.id}')" class="text-gray-400 hover:text-red-500 transition-colors" title="Add to Favorites">
+                        <i class="ph ph-heart text-[22px]"></i>
+                    </button>
                 </div>
                 
                 <h3 class="text-[18px] font-extrabold text-gray-900 leading-tight cursor-pointer hover:text-brand transition-colors mb-1.5" onclick="showDetail('${t.id}')">${escapeHTML(t.title)}</h3>
@@ -474,15 +553,15 @@
                     <a href="preview.html?id=${t.id}" target="_blank" class="flex items-center justify-center bg-white hover:bg-gray-50 text-gray-800 text-[14px] font-bold py-3 rounded-lg border border-gray-200 transition-colors shadow-sm">
                         Preview
                     </a>
-                    <button onclick="downloadTemplate('${t.id}', event)" class="flex items-center justify-center bg-brand hover:bg-brand/90 text-white text-[14px] font-bold py-3 rounded-lg shadow-sm transition-colors">
-                        Use Template
+                    <button onclick="openWhatsAppWithTemplate('${t.id}', event)" class="flex items-center justify-center gap-1.5 bg-brand hover:bg-brand/90 text-white text-[14px] font-bold py-3 rounded-lg shadow-sm transition-colors">
+                        <i class="ph-bold ph-whatsapp-logo text-base"></i> Use Template
                     </button>
                 </div>
             </div>
         </article>`;
     }
 
-function render() {
+    function render() {
         const list = visible();
         document.getElementById("grid").innerHTML = list.length
             ? list.map(card).join("")
@@ -492,11 +571,9 @@ function render() {
                    <p class="text-[15px] text-gray-500">Try selecting a different filter or search term.</p>
                </div>`;
 
-        // NEW: Hide banner if a category, search, or filter is active
         const banner = document.getElementById('hero-banner');
         if (banner) {
             const isFiltered = activeCategory !== 'all' || activePrice !== 'all' || query !== '' || activeFeatures.length > 0 || (activeFilterType !== 'all' && activeFilterType !== 'sort');
-            
             if (isFiltered) {
                 banner.classList.add('hidden');
             } else {
@@ -511,16 +588,11 @@ function render() {
         render();           
     };
 
-function renderCategories() {
+    function renderCategories() {
         const allTemplates = getAllTemplates();
-        
-        // Build categories from the published templates returned by the data store.
-        let dbList = typeof Store !== 'undefined' && Store.published ? [...Store.published()] : [];
-
         const categoryMap = {};
         
-        // Build sidebar categories from the published templates.
-        dbList.forEach(t => {
+        allTemplates.forEach(t => {
             const catName = t.category || "Others";
             if (!categoryMap[catName]) {
                 categoryMap[catName] = { name: catName, icon: "ph-folder" };
@@ -541,11 +613,7 @@ function renderCategories() {
             
             activeCats.forEach(c => {
                 const isActive = activeCategory.toLowerCase() === c.name.toLowerCase();
-                
-                // Check counts against the grid display
                 const catCount = allTemplates.filter(t => (t.category || '').toLowerCase() === c.name.toLowerCase()).length;
-
-                // Safely format the category name for the onclick function
                 const safeCatName = (c.name || '').replace(/'/g, "\\'");
 
                 html += `<button onclick="filterByCategory('${safeCatName}')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-[14px] ${isActive ? 'bg-brand/10 text-brand font-bold' : 'text-gray-700 font-medium hover:bg-gray-50'} transition-colors mb-1">
@@ -593,6 +661,8 @@ function renderCategories() {
             ? `<span class="bg-green-50 text-green-600 text-xs font-bold px-2.5 py-1 rounded-md tracking-wide">Free</span>`
             : `<span class="bg-blue-50 text-brand text-xs font-bold px-2.5 py-1 rounded-md tracking-wide">Premium</span>`;
 
+        const { finalMessage } = getWhatsAppConfig(t.title);
+
         const contentHtml = `
             <div class="grid lg:grid-cols-3 gap-10">
                 <div class="lg:col-span-2 space-y-6">
@@ -621,80 +691,84 @@ function renderCategories() {
                             <span class="text-[14px] font-medium text-gray-500 border-l border-gray-200 pl-3">${escapeHTML(t.category || 'Web Templates')}</span>
                         </div>
                         
-                        <p class="text-gray-600 text-[15px] mb-8 leading-relaxed">
+                        <p class="text-gray-600 text-[15px] mb-6 leading-relaxed">
                             ${escapeHTML(t.description || 'Professional, modern and ready-to-use template for your next business project. Clean code, fully responsive, and easy to customize.')}
                         </p>
+
+                        <!-- Pre-filled WhatsApp Message Preview Box -->
+                        <div class="bg-[#F0FDF4] border border-[#BBF7D0] rounded-xl p-4 mb-6">
+                            <div class="flex items-center gap-2 text-[#15803D] font-bold text-[12px] uppercase tracking-wider mb-1.5">
+                                <i class="ph-fill ph-whatsapp-logo text-base"></i> Ready-to-Send WhatsApp Message
+                            </div>
+                            <p class="text-[13px] text-gray-800 font-medium italic bg-white/80 p-2.5 rounded-lg border border-green-100">
+                                "${escapeHTML(finalMessage)}"
+                            </p>
+                            <p class="text-[11px] text-gray-500 mt-1.5">When WhatsApp opens on your phone or computer, this message is already typed in the chat box so you just tap <strong>Send</strong>.</p>
+                        </div>
                         
-                    <!-- Default Action Buttons View -->
-<div id="action-buttons-view" class="flex flex-col gap-3 mb-8">
-    <div class="flex gap-3 mb-1">
-       <button onclick="toggleDetailLike(this)" class="flex-1 flex items-center justify-center bg-white hover:bg-gray-50 text-gray-700 text-[14px] font-bold py-3 rounded-xl border border-gray-200 transition-colors shadow-sm gap-2">
-    <i class="ph ph-heart text-xl"></i> <span>Like (24)</span>
-</button>
-        <a href="preview.html?id=${t.id}" target="_blank" class="flex-1 flex items-center justify-center bg-gray-50 hover:bg-gray-100 text-gray-800 text-[14px] font-bold py-3 rounded-xl border border-gray-200 transition-colors gap-2">
-            Preview
-        </a>
-    </div>
-    <button onclick="showContactForm()" class="w-full flex items-center justify-center bg-brand hover:bg-brand/90 text-white text-[15px] font-bold py-3.5 rounded-xl shadow-md transition-colors gap-2">
-        Contact for Work <i class="ph-bold ph-paper-plane-tilt text-lg"></i>
-    </button>
-</div>
+                        <!-- Default Action Buttons View -->
+                        <div id="action-buttons-view" class="flex flex-col gap-3 mb-8">
+                            <div class="flex gap-3 mb-1">
+                                <button onclick="toggleDetailLike(this)" class="flex-1 flex items-center justify-center bg-white hover:bg-gray-50 text-gray-700 text-[14px] font-bold py-3 rounded-xl border border-gray-200 transition-colors shadow-sm gap-2">
+                                    <i class="ph ph-heart text-xl"></i> <span>Like (24)</span>
+                                </button>
+                                <a href="preview.html?id=${t.id}" target="_blank" class="flex-1 flex items-center justify-center bg-gray-50 hover:bg-gray-100 text-gray-800 text-[14px] font-bold py-3 rounded-xl border border-gray-200 transition-colors gap-2">
+                                    Preview
+                                </a>
+                            </div>
+                            <button onclick="openWhatsAppWithTemplate('${t.id}', event)" class="w-full flex items-center justify-center bg-[#25D366] hover:bg-[#20bd5a] text-white text-[15px] font-bold py-3.5 rounded-xl shadow-md transition-colors gap-2">
+                                <i class="ph-fill ph-whatsapp-logo text-xl"></i> Chat on WhatsApp (Just Tap Send)
+                            </button>
+                            <button onclick="showContactForm()" class="w-full flex items-center justify-center bg-brand hover:bg-brand/90 text-white text-[14px] font-bold py-3 rounded-xl shadow-sm transition-colors gap-2">
+                                Customize Message / Project Details <i class="ph-bold ph-paper-plane-tilt text-base"></i>
+                            </button>
+                        </div>
 
-<!-- Let's Work Together Form (Hidden by default) -->
-<div id="contact-form-view" class="hidden mb-8 bg-[#FFF9F0] rounded-2xl p-6 border border-[#FFE4B5]">
-    <h3 class="text-xl font-extrabold text-gray-900 mb-1 flex items-center gap-2">
-        <i class="ph-fill ph-paper-plane-tilt text-brand"></i> Let's Work Together!
-    </h3>
-    <p class="text-[13px] text-gray-500 mb-5">Tell me about your project. I'll get back to you soon.</p>
-    
-    <div class="space-y-4">
-        <div>
-            <label class="block text-[12px] font-bold text-gray-700 mb-1">Your Name *</label>
-            <input type="text" placeholder="John Doe" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[14px] focus:outline-none focus:border-brand shadow-sm">
-        </div>
-        <div>
-            <label class="block text-[12px] font-bold text-gray-700 mb-1">Email *</label>
-            <input type="email" placeholder="john@example.com" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[14px] focus:outline-none focus:border-brand shadow-sm">
-        </div>
-        <div>
-            <label class="block text-[12px] font-bold text-gray-700 mb-1">Project Type *</label>
-            <select class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[14px] focus:outline-none focus:border-brand shadow-sm">
-                <option>Website using this template</option>
-                <option>Custom Web Development</option>
-                <option>UI/UX Design</option>
-            </select>
-        </div>
-        <div>
-            <label class="block text-[12px] font-bold text-gray-700 mb-1">Your Requirements *</label>
-            <textarea rows="3" placeholder="Tell me about your business and what you need..." class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[14px] focus:outline-none focus:border-brand shadow-sm resize-none"></textarea>
-        </div>
-        <div class="flex gap-3 pt-2">
-            <button onclick="hideContactForm()" class="flex-1 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 font-bold py-3 rounded-lg text-[14px] shadow-sm transition-colors">Cancel</button>
-            <button onclick="submitContactForm()" class="flex-1 bg-brand hover:bg-brand/90 text-white font-bold py-3 rounded-lg text-[14px] shadow-md transition-colors">Send Message</button>
-        </div>
-    </div>
-</div>
+                        <!-- Let's Work Together Form (Hidden by default) -->
+                        <div id="contact-form-view" class="hidden mb-8 bg-[#FFF9F0] rounded-2xl p-6 border border-[#FFE4B5]">
+                            <h3 class="text-xl font-extrabold text-gray-900 mb-1 flex items-center gap-2">
+                                <i class="ph-fill ph-paper-plane-tilt text-brand"></i> Ask about this template
+                            </h3>
+                            <p class="text-[13px] text-gray-500 mb-5">Leave your contact details and question. We’ll save your request and open WhatsApp for you.</p>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-[12px] font-bold text-gray-700 mb-1" for="waClientName">Your Name *</label>
+                                    <input id="waClientName" type="text" maxlength="120" required autocomplete="name" placeholder="John Doe" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[14px] focus:outline-none focus:border-brand shadow-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-[12px] font-bold text-gray-700 mb-1" for="waClientEmail">Email Address *</label>
+                                    <input id="waClientEmail" type="email" maxlength="254" required autocomplete="email" placeholder="you@example.com" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[14px] focus:outline-none focus:border-brand shadow-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-[12px] font-bold text-gray-700 mb-1" for="waClientPhone">Phone (Optional)</label>
+                                    <input id="waClientPhone" type="tel" maxlength="40" autocomplete="tel" placeholder="+1 555 123 4567" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[14px] focus:outline-none focus:border-brand shadow-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-[12px] font-bold text-gray-700 mb-1" for="waClientReq">Your Question / Requirements *</label>
+                                    <textarea id="waClientReq" rows="3" maxlength="5000" required placeholder="Tell us what you’d like to know about this template..." class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[14px] focus:outline-none focus:border-brand shadow-sm resize-none"></textarea>
+                                </div>
+                                <div class="flex gap-3 pt-2">
+                                    <button onclick="hideContactForm()" class="flex-1 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 font-bold py-3 rounded-lg text-[14px] shadow-sm transition-colors">Cancel</button>
+                                    <button id="submitInquiryButton" onclick="submitContactForm()" class="flex-1 bg-brand hover:bg-brand/90 text-white font-bold py-3 rounded-lg text-[14px] shadow-md transition-colors flex items-center justify-center gap-1.5">
+                                        <i class="ph-bold ph-paper-plane-tilt text-lg"></i> Send inquiry
+                                    </button>
+                                </div>
+                                <p id="inquiry-error" class="hidden text-sm text-red-600" role="alert"></p>
+                            </div>
+                        </div>
 
-<!-- Success Screen (Hidden by default) -->
-<div id="contact-success-view" class="hidden mb-8 bg-[#F4F2FF] rounded-2xl p-8 border border-purple-100 text-center shadow-sm">
-    <div class="w-14 h-14 bg-[#10B981] text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
-        <i class="ph-bold ph-check text-2xl"></i>
-    </div>
-    <h3 class="text-2xl font-bold text-gray-900 mb-2">Message Sent!</h3>
-    <p class="text-[14px] text-gray-600 mb-6">Thank you for reaching out.<br>I'll get back to you within 24 hours.</p>
-    <button onclick="hideContactForm()" class="bg-white hover:bg-gray-50 border border-gray-200 text-gray-800 font-bold py-2.5 px-6 rounded-lg text-[14px] shadow-sm transition-colors mb-6">
-        Back to Templates
-    </button>
-    <div class="text-left bg-white p-5 rounded-xl border border-gray-100 inline-block text-[13px] text-gray-600 w-full shadow-sm">
-        <p class="font-bold text-gray-800 mb-2.5 flex items-center gap-1.5"><i class="ph-bold ph-envelope-simple text-gray-400"></i> You will receive:</p>
-        <ul class="space-y-2 ml-1">
-            <li class="flex items-center gap-2"><i class="ph-bold ph-check text-brand"></i> Name & Email</li>
-            <li class="flex items-center gap-2"><i class="ph-bold ph-check text-brand"></i> Project type</li>
-            <li class="flex items-center gap-2"><i class="ph-bold ph-check text-brand"></i> Requirement details</li>
-            <li class="flex items-start gap-2"><i class="ph-bold ph-check text-brand mt-0.5"></i> <span>You can reply directly and start the conversation.</span></li>
-        </ul>
-    </div>
-</div>
+                        <!-- Success Screen (Hidden by default) -->
+                        <div id="contact-success-view" class="hidden mb-8 bg-[#F4F2FF] rounded-2xl p-8 border border-purple-100 text-center shadow-sm">
+                            <div class="w-14 h-14 bg-[#10B981] text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
+                                <i class="ph-bold ph-check text-2xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">Inquiry saved!</h3>
+                            <p class="text-[14px] text-gray-600 mb-6">Your request has been sent to the template owner. WhatsApp will open with your message if available.</p>
+                            <button onclick="hideContactForm()" class="bg-white hover:bg-gray-50 border border-gray-200 text-gray-800 font-bold py-2.5 px-6 rounded-lg text-[14px] shadow-sm transition-colors">
+                                Back to Template Details
+                            </button>
+                        </div>
                     </div>
 
                     <div class="bg-gray-50 rounded-2xl border border-gray-200 p-6">
@@ -709,15 +783,14 @@ function renderCategories() {
                 </div>
             </div>
         `;
-      document.getElementById('detail-content').innerHTML = contentHtml;
+        document.getElementById('detail-content').innerHTML = contentHtml;
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    }; // <-- Properly closes showDetail immediately
+    };
 
     // --- Interactive Form & Button Logic ---
-  window.showContactForm = function() {
+    window.showContactForm = function() {
         document.getElementById('action-buttons-view').classList.add('hidden');
         document.getElementById('contact-form-view').classList.remove('hidden');
-        // Automatically scroll down to the form
         setTimeout(() => {
             document.getElementById('contact-form-view').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 100);
@@ -729,28 +802,68 @@ function renderCategories() {
         document.getElementById('action-buttons-view').classList.remove('hidden');
     };
 
-    window.submitContactForm = function() {
+    window.submitContactForm = async function() {
+        const nameEl = document.getElementById('waClientName');
+        const emailEl = document.getElementById('waClientEmail');
+        const phoneEl = document.getElementById('waClientPhone');
+        const reqEl = document.getElementById('waClientReq');
+        const submitButton = document.getElementById('submitInquiryButton');
+        const errorEl = document.getElementById('inquiry-error');
+
+        errorEl.classList.add('hidden');
+        if (!nameEl.reportValidity() || !emailEl.reportValidity() || !reqEl.reportValidity()) return;
+
+        const template = window.currentPreviewTemplate;
+        const message = reqEl.value.trim();
+        const whatsappWindow = window.open('about:blank', '_blank');
+        if (whatsappWindow) whatsappWindow.opener = null;
+        submitButton.disabled = true;
+        submitButton.textContent = 'Sending...';
+        try {
+            await Store.createInquiry({
+                templateId: template.id,
+                name: nameEl.value.trim(),
+                email: emailEl.value.trim(),
+                phone: phoneEl.value.trim(),
+                message
+            });
+        } catch (error) {
+            if (whatsappWindow) whatsappWindow.close();
+            errorEl.textContent = error.message;
+            errorEl.classList.remove('hidden');
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<i class="ph-bold ph-paper-plane-tilt text-lg"></i> Send inquiry';
+            return;
+        }
+
+        const settings = (typeof Store !== 'undefined' && Store.settings) ? Store.settings() : {};
+        const rawPhone = settings.phone || "+919779127286";
+        const cleanPhone = rawPhone.replace(/\D/g, "");
+        const whatsappMessage = `Hi! I'm ${nameEl.value.trim()} (${emailEl.value.trim()}) and I'm interested in the ${template.title} template.\n\n${message}`;
+        const waUrl = cleanPhone
+            ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(whatsappMessage)}`
+            : `https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`;
+
+        if (whatsappWindow) whatsappWindow.location.href = waUrl;
+
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<i class="ph-bold ph-paper-plane-tilt text-lg"></i> Send inquiry';
         document.getElementById('contact-form-view').classList.add('hidden');
         document.getElementById('contact-success-view').classList.remove('hidden');
     };
 
     window.toggleGridLike = function(btn, event, id) {
-        if(event) event.stopPropagation(); 
+        if (event) event.stopPropagation(); 
         
-        // 1. Visually fill the heart with red
         const icon = btn.querySelector('i');
         icon.classList.add('ph-fill', 'text-red-500');
         icon.classList.remove('ph', 'text-gray-400');
         
-        // 2. Open the template details page
         showDetail(id);
-        
-        // 3. Instantly trigger the "Contact for Work" form
         showContactForm();
     };
 
     window.toggleDetailLike = function(btn) {
-        // 1. Visually mark as liked
         const icon = btn.querySelector('i');
         const span = btn.querySelector('span');
         
@@ -761,12 +874,11 @@ function renderCategories() {
         btn.classList.remove('bg-white', 'border-gray-200', 'text-gray-700');
         span.innerText = 'Liked (25)';
 
-        // 2. Instantly trigger the "Contact for Work" form
         showContactForm();
     };
 
     window.showHome = function(e) {
-        if(e) e.preventDefault();
+        if (e) e.preventDefault();
         document.getElementById('detail-view').classList.add('hidden');
         document.getElementById('home-main').classList.remove('hidden');
         document.getElementById('bottom-banner').classList.remove('hidden');
@@ -774,9 +886,9 @@ function renderCategories() {
 
     document.getElementById("sort-dropdown").addEventListener("change", e => { 
         activeSort = e.target.value; 
-        if(activeSort === 'popular') setFilter('sort', 'popular');
-        else if(activeSort === 'latest') setFilter('sort', 'new');
-        else if(activeSort === 'trending') setFilter('sort', 'trending');
+        if (activeSort === 'popular') setFilter('sort', 'popular');
+        else if (activeSort === 'latest') setFilter('sort', 'new');
+        else if (activeSort === 'trending') setFilter('sort', 'trending');
         else render(); 
     });
 
@@ -786,7 +898,7 @@ function renderCategories() {
     document.addEventListener("cm:ready", () => { renderPills(); renderCategories(); render(); });
 
     window.downloadTemplate = function(id, event) {
-        if(event) event.stopPropagation();
+        if (event) event.stopPropagation();
         const list = getAllTemplates();
         const t = list.find(x => String(x.id) === String(id)) || { title: 'Template' };
         
@@ -799,7 +911,7 @@ function renderCategories() {
     };
 
     window.shareTemplate = function(id, event) {
-        if(event) event.stopPropagation();
+        if (event) event.stopPropagation();
         const url = new URL(window.location.href);
         url.searchParams.set('preview', id);
         
@@ -817,6 +929,222 @@ function renderCategories() {
     if (previewId) {
         showDetail(previewId);
     }
+})();
+</script>
+<script>
+(() => {
+    const modal = document.getElementById('customer-auth-modal');
+    const loginView = document.getElementById('customer-login-view');
+    const accountView = document.getElementById('customer-account-view');
+    const form = document.getElementById('customer-auth-form');
+    const nameInput = document.getElementById('customer-name');
+    const emailInput = document.getElementById('customer-email');
+    const passwordInput = document.getElementById('customer-password');
+    const errorMessage = document.getElementById('customer-auth-error');
+    let activeArea = 'cart';
+    let isRegistering = false;
+    let googleClientId = '';
+    let googleInitialized = false;
+
+    function renderLoginMode() {
+        document.getElementById('customer-name-wrap').classList.toggle('hidden', !isRegistering);
+        nameInput.required = isRegistering;
+        passwordInput.autocomplete = isRegistering ? 'new-password' : 'current-password';
+        passwordInput.minLength = isRegistering ? 10 : 1;
+        document.getElementById('customer-submit').textContent = isRegistering ? 'Create account' : 'Sign in';
+        document.getElementById('customer-mode-prompt').textContent = isRegistering
+            ? 'Already have an account?'
+            : 'New here?';
+        document.getElementById('customer-mode-toggle').textContent = isRegistering
+            ? 'Sign in'
+            : 'Create account';
+        errorMessage.classList.add('hidden');
+    }
+
+    function showLogin() {
+        document.getElementById('customer-auth-title').textContent = 'Sign in to continue';
+        document.getElementById('customer-auth-description').textContent =
+            'Sign in to access your cart and favorites.';
+        errorMessage.classList.add('hidden');
+        document.getElementById('google-signin-error').classList.add('hidden');
+        loginView.classList.remove('hidden');
+        accountView.classList.add('hidden');
+    }
+
+    function renderCustomerArea(customer) {
+        const areaTitle = activeArea === 'favorites' ? 'Your Favorites' : 'Your Cart';
+        document.getElementById('customer-auth-title').textContent = areaTitle;
+        document.getElementById('customer-auth-description').textContent = 'You are signed in.';
+        document.getElementById('customer-account-label').textContent =
+            `${customer.name} · ${customer.email}`;
+
+        const items = activeArea === 'favorites' ? Store.wishlist() : Store.cart();
+        const content = document.getElementById('customer-area-content');
+        if (!items.length) {
+            content.innerHTML = `<div class="rounded-xl bg-gray-50 px-5 py-8 text-center">
+                <i class="ph ${activeArea === 'favorites' ? 'ph-heart' : 'ph-shopping-cart'} text-3xl text-gray-400"></i>
+                <p class="mt-2 font-semibold text-gray-800">Your ${activeArea === 'favorites' ? 'favorites list' : 'cart'} is empty</p>
+                <p class="mt-1 text-sm text-gray-500">You can keep browsing templates and come back here anytime.</p>
+            </div>`;
+        } else {
+            content.innerHTML = `<div class="space-y-3">${items.map((item) => {
+                const id = typeof item === 'string' ? item : item.templateId || item.id;
+                const template = id ? Store.template(String(id)) : null;
+                const title = template?.title || (typeof item === 'object' ? item.title : '') || 'Saved template';
+                const safeId = Store.escape(String(id || ''));
+                return `<div class="flex items-center justify-between gap-3 rounded-xl border border-gray-100 p-3">
+                    <span class="font-semibold text-gray-800">${Store.escape(title)}</span>
+                    ${safeId ? `<button type="button" data-open-template="${safeId}" class="text-sm font-bold text-brand hover:underline">View</button>` : ''}
+                </div>`;
+            }).join('')}</div>`;
+            content.querySelectorAll('[data-open-template]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    closeCustomerArea();
+                    showDetail(button.dataset.openTemplate);
+                });
+            });
+        }
+
+        loginView.classList.add('hidden');
+        accountView.classList.remove('hidden');
+    }
+
+    async function finishSignIn(signInPromise) {
+        const googleError = document.getElementById('google-signin-error');
+        googleError.classList.add('hidden');
+        errorMessage.classList.add('hidden');
+        try {
+            const customer = await signInPromise;
+            renderCustomerArea(customer);
+        } catch (error) {
+            errorMessage.textContent = error.message;
+            errorMessage.classList.remove('hidden');
+            googleError.textContent = error.message;
+            googleError.classList.remove('hidden');
+        }
+    }
+
+    async function setupGoogleSignIn() {
+        const setupMessage = document.getElementById('google-signin-setup');
+        const button = document.getElementById('google-signin-button');
+        try {
+            const configuration = await Store.customerAuthConfig();
+            googleClientId = configuration.googleClientId;
+            if (!googleClientId) {
+                setupMessage.textContent = 'Google sign-in needs a Google OAuth client ID configured by the site owner.';
+                setupMessage.classList.remove('hidden');
+                return;
+            }
+
+            for (let attempt = 0; attempt < 50 && !window.google?.accounts?.id; attempt += 1) {
+                await new Promise((resolve) => window.setTimeout(resolve, 100));
+            }
+            if (!window.google?.accounts?.id) {
+                throw new Error('Google sign-in could not load. Check your connection and try again.');
+            }
+
+            setupMessage.classList.add('hidden');
+            document.getElementById('google-signin-unconfigured').classList.add('hidden');
+            button.replaceChildren();
+            window.google.accounts.id.initialize({
+                client_id: googleClientId,
+                callback(response) {
+                    if (!response.credential) {
+                        document.getElementById('google-signin-error').textContent =
+                            'Google did not return a sign-in credential.';
+                        document.getElementById('google-signin-error').classList.remove('hidden');
+                        return;
+                    }
+                    finishSignIn(Store.customerGoogleLogin(response.credential));
+                }
+            });
+            googleInitialized = true;
+            window.google.accounts.id.renderButton(button, {
+                theme: 'outline',
+                size: 'large',
+                shape: 'rectangular',
+                text: 'continue_with',
+                width: 340
+            });
+        } catch (error) {
+            setupMessage.textContent = error.message;
+            setupMessage.classList.remove('hidden');
+        }
+    }
+
+    window.openCustomerArea = async function(area) {
+        activeArea = area === 'favorites' ? 'favorites' : 'cart';
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        showLogin();
+        try {
+            const customer = await Store.customerSession();
+            if (customer) renderCustomerArea(customer);
+            else if (!googleInitialized) setupGoogleSignIn();
+        } catch (error) {
+            console.error('Could not load customer session:', error);
+            errorMessage.textContent = 'Could not check your sign-in status. Please try again.';
+            errorMessage.classList.remove('hidden');
+        }
+    };
+
+    window.closeCustomerArea = function() {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    };
+
+    document.getElementById('customer-mode-toggle').addEventListener('click', () => {
+        isRegistering = !isRegistering;
+        renderLoginMode();
+    });
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        errorMessage.classList.add('hidden');
+        const submitButton = document.getElementById('customer-submit');
+        submitButton.disabled = true;
+        submitButton.textContent = isRegistering ? 'Creating account...' : 'Signing in...';
+        const result = isRegistering
+            ? Store.customerRegister(nameInput.value, emailInput.value, passwordInput.value)
+            : Store.customerLogin(emailInput.value, passwordInput.value);
+        try {
+            const customer = await result;
+            renderCustomerArea(customer);
+        } catch (error) {
+            errorMessage.textContent = error.message;
+            errorMessage.classList.remove('hidden');
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = isRegistering ? 'Create account' : 'Sign in';
+        }
+    });
+
+    document.getElementById('customer-logout').addEventListener('click', async () => {
+        const button = document.getElementById('customer-logout');
+        button.disabled = true;
+        try {
+            await Store.customerLogout();
+            showLogin();
+            isRegistering = false;
+            renderLoginMode();
+            setupGoogleSignIn();
+        } catch (error) {
+            document.getElementById('customer-account-label').textContent = error.message;
+        } finally {
+            button.disabled = false;
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+            window.closeCustomerArea();
+        }
+    });
+
+    document.addEventListener('cm:ready', () => {
+        document.getElementById('cart-count').textContent = Store.cart().length;
+    });
+    renderLoginMode();
 })();
 </script>
 </body>

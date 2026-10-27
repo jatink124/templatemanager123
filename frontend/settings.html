@@ -1,7 +1,7 @@
 <!-- Settings (fragment loaded into dashboard.html) -->
 <div class="mb-8">
     <h1 class="text-[1.75rem] font-bold text-gray-900 mb-1">Settings</h1>
-    <p class="text-gray-500 text-sm">Update your profile, store details, payouts and notifications. Everything saves to your store data.</p>
+    <p class="text-gray-500 text-sm">Update your profile, store details, WhatsApp pre-filled message, payouts and notifications. Everything saves to your store data.</p>
 </div>
 
 <div class="max-w-3xl space-y-6 mb-10">
@@ -22,8 +22,8 @@
                 <input id="setEmail" type="email" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 shadow-sm">
             </div>
             <div>
-                <label class="block text-sm font-bold text-gray-900 mb-2">Phone Number</label>
-                <input id="setPhone" type="text" placeholder="+91 98765 43210" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 shadow-sm">
+                <label class="block text-sm font-bold text-gray-900 mb-2">Phone / WhatsApp Number</label>
+                <input id="setPhone" type="text" placeholder="+91 9779127286" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 shadow-sm">
             </div>
             <div>
                 <label class="block text-sm font-bold text-gray-900 mb-2">Location</label>
@@ -36,11 +36,11 @@
         </div>
     </div>
 
-    <!-- Store -->
+    <!-- Store & WhatsApp Pre-filled Message -->
     <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 shadow-sm">
         <div class="mb-6">
-            <h2 class="text-lg font-bold text-gray-900 mb-1">Store Details</h2>
-            <p class="text-[13px] text-gray-500">How buyers find and recognise your store.</p>
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Store & WhatsApp Settings</h2>
+            <p class="text-[13px] text-gray-500">How buyers find your store and message you directly on WhatsApp.</p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -50,6 +50,11 @@
             <div>
                 <label class="block text-sm font-bold text-gray-900 mb-2">Store URL</label>
                 <input id="setStoreUrl" type="text" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 shadow-sm">
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-bold text-gray-900 mb-1">WhatsApp Pre-filled Message</label>
+                <p class="text-[12px] text-gray-500 mb-2">When WhatsApp opens on the visitor's phone or computer, this is the ready-made message already typed in the chat box so they just tap Send. Use <code class="bg-gray-100 px-1.5 py-0.5 rounded text-gray-800 font-semibold">{title}</code> to automatically insert the template name.</p>
+                <textarea id="setWhatsappMessage" rows="2" placeholder="Hi! I'm interested in using the {title} template" class="w-full bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 shadow-sm resize-none"></textarea>
             </div>
         </div>
     </div>
@@ -119,6 +124,8 @@
 
 <script>
 (function () {
+    const DEFAULT_WA_MSG = "Hi! I'm interested in using the {title} template";
+
     function fill() {
         const s = Store.settings();
         document.getElementById("setFullName").value = s.fullName || "";
@@ -128,6 +135,7 @@
         document.getElementById("setBio").value = s.bio || "";
         document.getElementById("setStoreName").value = s.storeName || "";
         document.getElementById("setStoreUrl").value = s.storeUrl || "";
+        document.getElementById("setWhatsappMessage").value = s.whatsappMessage || DEFAULT_WA_MSG;
         document.getElementById("setPayoutMethod").value = s.payoutMethod || "PayPal";
         document.getElementById("setPayoutEmail").value = s.payoutEmail || "";
         document.getElementById("setNotifySales").checked = !!s.notifySales;
@@ -146,6 +154,7 @@
             bio: document.getElementById("setBio").value.trim(),
             storeName: document.getElementById("setStoreName").value.trim(),
             storeUrl: document.getElementById("setStoreUrl").value.trim(),
+            whatsappMessage: document.getElementById("setWhatsappMessage").value.trim() || DEFAULT_WA_MSG,
             payoutMethod: document.getElementById("setPayoutMethod").value,
             payoutEmail: document.getElementById("setPayoutEmail").value.trim(),
             notifySales: document.getElementById("setNotifySales").checked,

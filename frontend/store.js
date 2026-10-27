@@ -7,6 +7,7 @@
     templates: "cm_templates",
     categories: "cm_categories",
     sales: "cm_sales",
+    inquiries: "cm_inquiries",
     settings: "cm_settings",
     cart: "cm_cart",
     wishlist: "cm_wishlist",
@@ -73,6 +74,28 @@
  // Store data in memory
   let memoryDB = {};
   const API_URL = window.CODEMARKET_API_URL || `${window.location.origin}/api`;
+  let customerUser = null;
+
+  async function customerAuthRequest(path, body) {
+    const response = await fetch(`${API_URL}/customer/auth/${path}`, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    let result = {};
+    try {
+      result = await response.json();
+    } catch (error) {
+      if (response.ok) throw new Error("The sign-in response was invalid");
+    }
+    if (!response.ok) throw new Error(result.error || "Could not complete sign-in");
+    if (!result.user) throw new Error("The sign-in response did not include an account");
+    customerUser = result.user;
+    document.dispatchEvent(new CustomEvent("cm:customer-auth", { detail: customerUser }));
+    return customerUser;
+  }
+
   function read(key, fallback) {
     return memoryDB[key] || fallback;
   }
@@ -94,6 +117,42 @@
   const Store = {
     KEYS,
     PLACEHOLDER,
+    customerUser() { return customerUser; },
+    async customerSession() {
+      const response = await fetch(`${API_URL}/customer/auth/session`, {
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+      if (!response.ok) throw new Error(`Customer session request failed (${response.status})`);
+      const result = await response.json();
+      customerUser = result.authenticated ? result.user : null;
+      return customerUser;
+    },
+    customerLogin(email, password) {
+      return customerAuthRequest("login", { email, password });
+    },
+    customerRegister(name, email, password) {
+      return customerAuthRequest("register", { name, email, password });
+    },
+    customerGoogleLogin(credential) {
+      return customerAuthRequest("google", { credential });
+    },
+    async customerLogout() {
+      const response = await fetch(`${API_URL}/customer/auth/logout`, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      if (!response.ok) throw new Error(`Sign-out failed (${response.status})`);
+      customerUser = null;
+      document.dispatchEvent(new CustomEvent("cm:customer-auth", { detail: null }));
+    },
+    async customerAuthConfig() {
+      const response = await fetch(`${API_URL}/customer/auth/config`, { cache: "no-store" });
+      if (!response.ok) throw new Error(`Customer auth configuration request failed (${response.status})`);
+      return response.json();
+    },
 
     seed() {
       if (!localStorage.getItem(KEYS.categories)) write(KEYS.categories, DEFAULT_CATEGORIES);
@@ -230,6 +289,30 @@
     },
 
     sales() { return read(KEYS.sales, []); },
+    inquiries() { return read(KEYS.inquiries, []); },
+    async createInquiry(data) {
+      const response = await fetch(`${API_URL}/inquiries`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      let result = {};
+      try {
+        result = await response.json();
+      } catch (error) {
+        if (response.ok) throw new Error("The inquiry response was invalid");
+      }
+      if (!response.ok) throw new Error(result.error || "Failed to submit inquiry");
+      return result;
+    },
+    async refreshInquiries() {
+      const response = await fetch(`${API_URL}/inquiries`, { cache: "no-store" });
+      if (!response.ok) throw new Error(`Inquiry API returned ${response.status}`);
+      const inquiries = await response.json();
+      if (!Array.isArray(inquiries)) throw new Error("Inquiry API returned invalid data");
+      memoryDB[KEYS.inquiries] = inquiries;
+      document.dispatchEvent(new CustomEvent("cm:refreshed"));
+    },
     sale(id) {
       return Store.sales().find((s) => s.id === id) || null;
     },

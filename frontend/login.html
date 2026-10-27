@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="same-origin">
+    <title>Seller sign in – CodeMarket</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background: #f7f7fb;
+            color: #171329;
+            font: 16px/1.5 Inter, ui-sans-serif, system-ui, sans-serif;
+        }
+        main {
+            width: min(100%, 420px);
+            padding: 36px;
+            border: 1px solid #e9e7f0;
+            border-radius: 20px;
+            background: #fff;
+            box-shadow: 0 20px 60px #24164a12;
+        }
+        .brand { margin: 0 0 28px; color: #6d28d9; font-size: 18px; font-weight: 750; }
+        h1 { margin: 0 0 8px; font-size: 26px; letter-spacing: -.03em; }
+        .description { margin: 0 0 26px; color: #656273; }
+        label { display: block; margin: 18px 0 7px; font-size: 14px; font-weight: 650; }
+        input {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #d9d6e2;
+            border-radius: 9px;
+            font: inherit;
+        }
+        input:focus { outline: 3px solid #8b5cf633; border-color: #7c3aed; }
+        button {
+            width: 100%;
+            margin-top: 24px;
+            padding: 12px;
+            border: 0;
+            border-radius: 9px;
+            background: #6d28d9;
+            color: white;
+            cursor: pointer;
+            font: inherit;
+            font-weight: 700;
+        }
+        button:disabled { cursor: wait; opacity: .7; }
+        #login-error {
+            margin: 16px 0 0;
+            padding: 11px 12px;
+            border-radius: 8px;
+            background: #fef2f2;
+            color: #b42318;
+            font-size: 14px;
+        }
+        #login-error[hidden] { display: none; }
+        @media (max-width: 480px) { main { padding: 28px 22px; } }
+    </style>
+</head>
+<body>
+    <main>
+        <p class="brand">CodeMarket</p>
+        <h1>Seller dashboard</h1>
+        <p class="description">Sign in with your administrator account to continue.</p>
+        <form id="login-form">
+            <label for="username">Username</label>
+            <input id="username" name="username" autocomplete="username" required>
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
+            <button type="submit">Sign in</button>
+            <p id="login-error" role="alert" hidden></p>
+        </form>
+    </main>
+    <script src="auth.js"></script>
+</body>
+</html>
