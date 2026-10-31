@@ -44,6 +44,10 @@ function getRoutePath(event) {
   const requestPath = event.path || '';
   const functionPrefix = '/.netlify/functions/api';
 
+  if (['/dashboard', '/dashboard/', '/dashboard.html'].includes(requestPath)) {
+    return '/dashboard';
+  }
+
   if (requestPath.startsWith(functionPrefix)) {
     return requestPath.slice(functionPrefix.length) || '/';
   }
