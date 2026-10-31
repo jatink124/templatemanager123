@@ -354,14 +354,26 @@
         });
 
         let knownInquiryIds = null;
+        let inquiriesLoadedFromApi = false;
+        function refreshInquiries() {
+            Store.refreshInquiries().catch(error => {
+                if (error.status === 401) {
+                    window.location.replace("/login.html?session=expired");
+                    return;
+                }
+                console.error("Could not refresh inquiries.", error);
+            });
+        }
+
         document.addEventListener("cm:changed", syncUser);
         document.addEventListener("cm:ready", () => {
             knownInquiryIds = new Set(Store.inquiries().map(inquiry => inquiry.id));
             if (currentPage === "dashboard") appContent.innerHTML = dashboardView();
+            refreshInquiries();
         });
         document.addEventListener("cm:refreshed", () => {
             const inquiries = Store.inquiries();
-            if (knownInquiryIds) {
+            if (inquiriesLoadedFromApi && knownInquiryIds) {
                 inquiries.filter(inquiry => !knownInquiryIds.has(inquiry.id)).forEach(inquiry => {
                     Store.toast(`New inquiry from ${inquiry.name}: ${inquiry.templateTitle}`);
                     if ("Notification" in window && Notification.permission === "granted") {
@@ -372,17 +384,12 @@
                 });
             }
             knownInquiryIds = new Set(inquiries.map(inquiry => inquiry.id));
+            inquiriesLoadedFromApi = true;
             if (currentPage === "dashboard") appContent.innerHTML = dashboardView();
         });
         window.setInterval(() => {
             if (document.visibilityState === "visible") {
-                Store.refreshInquiries().catch(error => {
-                    if (error.status === 401) {
-                        window.location.replace("/login.html?session=expired");
-                        return;
-                    }
-                    console.error("Could not refresh inquiries.", error);
-                });
+                refreshInquiries();
             }
         }, 30000);
         syncUser();
