@@ -376,7 +376,13 @@
         });
         window.setInterval(() => {
             if (document.visibilityState === "visible") {
-                Store.refreshInquiries().catch(error => console.error("Could not refresh inquiries.", error));
+                Store.refreshInquiries().catch(error => {
+                    if (error.status === 401) {
+                        window.location.replace("/login.html?session=expired");
+                        return;
+                    }
+                    console.error("Could not refresh inquiries.", error);
+                });
             }
         }, 30000);
         syncUser();

@@ -306,8 +306,15 @@
       return result;
     },
     async refreshInquiries() {
-      const response = await fetch(`${API_URL}/inquiries`, { cache: "no-store" });
-      if (!response.ok) throw new Error(`Inquiry API returned ${response.status}`);
+      const response = await fetch(`${API_URL}/inquiries`, {
+        cache: "no-store",
+        credentials: "same-origin",
+      });
+      if (!response.ok) {
+        const error = new Error(`Inquiry API returned ${response.status}`);
+        error.status = response.status;
+        throw error;
+      }
       const inquiries = await response.json();
       if (!Array.isArray(inquiries)) throw new Error("Inquiry API returned invalid data");
       memoryDB[KEYS.inquiries] = inquiries;

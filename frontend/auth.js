@@ -22,6 +22,11 @@
 
     const errorMessage = document.getElementById('login-error');
     const submitButton = form.querySelector('button[type="submit"]');
+    if (new URLSearchParams(window.location.search).get('session') === 'expired') {
+        errorMessage.textContent = 'Your sign-in session expired. Please sign in again.';
+        errorMessage.hidden = false;
+    }
+
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         errorMessage.hidden = true;
