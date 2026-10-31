@@ -13,6 +13,18 @@
   force = true
 
 [[redirects]]
+  from = "/dashboard"
+  to = "/.netlify/functions/api/dashboard"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/dashboard/"
+  to = "/.netlify/functions/api/dashboard"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/api/:splat"
   status = 200
