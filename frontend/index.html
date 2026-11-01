@@ -22,13 +22,31 @@
         body { background-color: #F8FAFC; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @media (max-width: 1023px) {
+            #store-sidebar {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                align-content: start;
+            }
+            #store-sidebar > div:first-child { grid-column: 1 / -1; }
+            #sidebar-categories {
+                flex-direction: row;
+                overflow-x: auto;
+                padding-bottom: 4px;
+            }
+            #sidebar-categories > button {
+                width: auto;
+                flex: 0 0 auto;
+                white-space: nowrap;
+            }
+        }
     </style>
 </head>
 <body class="font-sans text-gray-800 antialiased selection:bg-brand selection:text-white flex flex-col min-h-screen overflow-x-hidden">
 
     <!-- ===================== Header ===================== -->
     <header class="bg-white w-full border-b border-gray-200 sticky top-0 z-50">
-        <div class="max-w-[1600px] mx-auto px-6 h-20 flex items-center justify-between gap-8">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 min-h-20 h-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-3 md:flex-nowrap md:py-0 md:gap-8">
             
             <!-- Logo -->
             <a href="#" onclick="showHome(event)" class="flex items-center gap-2 text-[22px] font-extrabold tracking-tight text-gray-900 shrink-0">
@@ -37,7 +55,7 @@
             </a>
 
             <!-- Search Bar -->
-            <div class="hidden md:flex relative w-full max-w-2xl mx-8">
+            <div class="order-3 md:order-none flex relative w-full max-w-none md:max-w-2xl md:mx-8">
                 <i class="ph ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></i>
                 <input id="search" type="text" placeholder="Search templates (e.g. clinic, restaurant, law firm...)"
                     class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-11 pr-20 py-3 text-[14px] text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-brand/30 focus:ring-4 focus:ring-brand/10 transition-all shadow-sm">
@@ -47,16 +65,16 @@
             </div>
 
             <!-- Actions -->
-            <div class="flex items-center gap-6 shrink-0">
-                <button type="button" onclick="openCustomerArea('favorites')" class="flex items-center gap-2 text-[14px] font-semibold text-gray-600 hover:text-gray-900 transition-colors">
-                    <i class="ph ph-heart text-2xl text-gray-400"></i> Favorites
+            <div class="flex items-center gap-3 sm:gap-6 shrink-0">
+                <button type="button" aria-label="Favorites" onclick="openCustomerArea('favorites')" class="flex items-center gap-2 text-[14px] font-semibold text-gray-600 hover:text-gray-900 transition-colors">
+                    <i class="ph ph-heart text-2xl text-gray-400"></i> <span class="hidden sm:inline">Favorites</span>
                 </button>
-                <button type="button" onclick="openCustomerArea('cart')" class="flex items-center gap-2 text-[14px] font-semibold text-gray-600 hover:text-gray-900 transition-colors relative">
+                <button type="button" aria-label="Cart" onclick="openCustomerArea('cart')" class="flex items-center gap-2 text-[14px] font-semibold text-gray-600 hover:text-gray-900 transition-colors relative">
                     <div class="relative">
                         <i class="ph ph-shopping-cart text-2xl text-gray-400"></i>
                         <span id="cart-count" class="absolute -top-1.5 -right-1.5 bg-brand text-white text-[10px] font-bold min-w-4 h-4 px-1 rounded-full flex items-center justify-center border-2 border-white box-content">0</span>
                     </div>
-                    Cart
+                    <span class="hidden sm:inline">Cart</span>
                 </button>
                 <a href="dashboard.html" class="w-10 h-10 rounded-full bg-brand/10 text-brand flex items-center justify-center text-[14px] font-bold ml-2 hover:bg-brand/20 transition-colors border border-brand/20">
                     JK
@@ -66,10 +84,10 @@
     </header>
 
     <!-- ===================== Main Content Wrapper ===================== -->
-    <div id="home-main" class="max-w-[1600px] w-full mx-auto px-6 py-8 flex items-start gap-8 flex-grow">
+    <div id="home-main" class="max-w-[1600px] w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 flex flex-col lg:flex-row items-start gap-6 lg:gap-8 flex-grow">
         
         <!-- ===================== Left Sidebar ===================== -->
-        <aside class="w-64 shrink-0 hidden lg:flex flex-col gap-8 sticky top-28 h-[calc(100vh-8rem)] overflow-y-auto no-scrollbar pb-8">
+        <aside id="store-sidebar" class="w-full lg:w-64 lg:shrink-0 flex flex-col lg:gap-8 gap-4 lg:sticky lg:top-28 lg:h-[calc(100vh-8rem)] lg:overflow-y-auto no-scrollbar lg:pb-8">
             
             <!-- Categories Navigation -->
             <div>
@@ -143,14 +161,14 @@
         <main class="flex-1 w-full min-w-0 flex flex-col">
             
             <!-- Redesigned Hero Banner -->
-            <section id="hero-banner" class="relative w-full bg-gradient-to-r from-[#F0F5FF] to-[#E2EEFF] rounded-2xl border border-blue-100 p-6 sm:p-8 lg:p-10 mb-8 flex flex-col xl:flex-row items-center justify-between overflow-hidden transition-all duration-300">
+            <section id="hero-banner" class="relative w-full bg-gradient-to-r from-[#F0F5FF] to-[#E2EEFF] rounded-2xl border border-blue-100 p-5 sm:p-8 lg:p-10 mb-8 flex flex-col 2xl:flex-row items-center justify-between overflow-hidden transition-all duration-300">
                 
                 <!-- Left Content (Text) -->
-                <div class="relative z-10 w-full xl:max-w-[480px] pb-6 xl:pb-0">
+                <div class="relative z-10 w-full xl:max-w-[480px] pb-6 2xl:pb-0">
                     <span class="inline-flex items-center bg-blue-100/80 text-brand text-[13px] font-bold px-4 py-1.5 rounded-full mb-5 tracking-wide shadow-sm border border-blue-200">
                         Professional Website Templates
                     </span>
-                    <h1 class="text-4xl lg:text-[42px] font-extrabold text-[#0B1120] tracking-tight leading-[1.1] mb-5 drop-shadow-sm">
+                    <h1 class="text-3xl sm:text-4xl lg:text-[42px] font-extrabold text-[#0B1120] tracking-tight leading-[1.1] mb-5 drop-shadow-sm">
                         Beautiful Templates for<br>Every Business
                     </h1>
                     <p class="text-[15px] text-gray-600 font-medium mb-8 max-w-md leading-relaxed">
@@ -167,7 +185,7 @@
                 </div>
 
                 <!-- Right Content (Laptop + Card + Arrow completely contained) -->
-                <div class="relative z-10 w-full xl:w-[650px] 2xl:w-[750px] h-[350px] sm:h-[450px] flex flex-col sm:block items-center">
+                <div class="relative z-10 w-full 2xl:w-[750px] h-auto sm:h-[450px] flex flex-col sm:block items-center">
                     
                     <!-- Laptop Image -->
                     <div class="sm:absolute left-0 top-1/2 sm:-translate-y-1/2 w-[90%] sm:w-[450px] z-10">
@@ -175,7 +193,7 @@
                     </div>
 
                     <!-- White Features Box (Overlaps laptop) -->
-                    <div class="sm:absolute right-0 xl:right-[150px] top-1/2 sm:-translate-y-1/2 z-20 bg-white/95 backdrop-blur rounded-[20px] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] p-5 sm:p-6 w-[90%] sm:w-[280px] border border-gray-100 flex flex-col gap-4 mt-6 sm:mt-0">
+                    <div class="sm:absolute right-0 2xl:right-[150px] top-1/2 sm:-translate-y-1/2 z-20 bg-white/95 backdrop-blur rounded-[20px] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] p-5 sm:p-6 w-[90%] sm:w-[280px] border border-gray-100 flex flex-col gap-4 mt-6 sm:mt-0">
                         <div class="flex items-start gap-4">
                             <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-brand shrink-0"><i class="ph-bold ph-desktop text-lg"></i></div>
                             <div class="pt-0.5"><h4 class="font-bold text-gray-900 text-[13px] mb-0.5">Live Preview</h4><p class="text-[11px] text-gray-400 font-medium leading-tight">See how it looks on mobile</p></div>
@@ -244,7 +262,7 @@
 
     <!-- ===================== Bottom Features Banner ===================== -->
     <div id="bottom-banner" class="mt-auto bg-white border-t border-gray-200 py-6">
-        <div class="max-w-[1600px] w-full mx-auto px-6 flex flex-col xl:flex-row items-center justify-between gap-8">
+        <div class="max-w-[1600px] w-full mx-auto px-4 sm:px-6 flex flex-col xl:flex-row items-center justify-between gap-8">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8 flex-grow">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 border border-gray-100 shrink-0"><i class="ph-bold ph-heart text-2xl"></i></div>
